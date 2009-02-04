@@ -1,0 +1,1 @@
+See https://sites.google.com/a/studionow.com/development/Home/brightcove-integration for pre-requisites.

@@ -1,11 +1,11 @@
-class BrigthcoveClientError(Exception):
+class BrightcoveClientError(Exception):
     pass
 
 
 class BrightcoveGeneralError(Exception):
-    self.code = None
-    self.message = None
-    self.data = None
+    code = None
+    message = None
+    data = None
     
     def __iniit__(self, code, message, data):
         self.code = code
@@ -14,8 +14,8 @@ class BrightcoveGeneralError(Exception):
 
 
 class BrightcoveError(Exception):
-    self.error = None
-    self.code  = None
+    error = None
+    code  = None
     
     def __init__(self, data):
         self.error = data['error']

@@ -40,9 +40,6 @@ Further Example:
   then uploads it to the W3C validator.
 """
 
-#### TODO:   THIS WON'T WORK AS IT WRITES OUT THE ENTIRE FILE TO MEMORY BEFORE POSTING IT.
-
-
 import urllib
 import urllib2
 import mimetools, mimetypes
