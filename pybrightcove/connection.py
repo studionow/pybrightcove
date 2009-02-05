@@ -3,7 +3,6 @@ import simplejson
 import urllib2
 import cookielib
 
-from pybrightcove.multipart import MultipartPostHandler
 from pybrightcove import config, UserAgent
 from pybrightcove.exceptions import BrightcoveClientError, BrightcoveError, BrightcoveGeneralError
 from pybrightcove.video import Video
@@ -30,6 +29,7 @@ class Connection(object):
             self.write_token = config.get('Connection', 'write_token')
             
     def _post_file(self, data, file_to_upload):
+        from pybrightcove.multipart import MultipartPostHandler
         cookies = cookielib.CookieJar()
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies), MultipartPostHandler)
         params = { "JSONRPC" : simplejson.dumps(data), "filePath" : open(file_to_upload, "rb") }
