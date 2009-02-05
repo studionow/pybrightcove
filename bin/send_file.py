@@ -6,8 +6,8 @@ c = Connection()
 import sys
 
 video = Video()
-video.title = sys.argv[1][:60]
-video.short_description = sys.argv[1]
+video.name = sys.argv[1][:60]
+video.shortDescription = sys.argv[1]
 
 for tag in sys.argv[2:]:
     video.tags.append(tag)
