@@ -111,7 +111,7 @@ class Video(object):
     def get_shortDescription(self):
         return self._shortDescription
     def set_shortDescription(self, desc):
-        self._shortDescription = desc[:256]
+        self._shortDescription = desc[:250]
     
     def get_longDescription(self):
         return self._longDescription
