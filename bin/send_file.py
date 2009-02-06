@@ -7,8 +7,8 @@ import sys
 
 video = Video()
 video.name = sys.argv[1]
-video.shortDescription = sys.argv[1]*50  # Test teh property only recording what's allowed by the API
-#print video.shortDescription
+video.shortDescription = sys.argv[1]*50  
+
 for tag in sys.argv[2:]:
     video.tags.append(tag)
 
