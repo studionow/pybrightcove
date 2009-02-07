@@ -1,1 +1,36 @@
-[ ] Create a proper TODO list. :)
+## General
+
+[ ] Add plumbing code on Connection object to perform GET requests and 
+    de-serialize response data form JSON into the appropriate objects.
+
+
+## Video Read APIs
+
+[ ] Implement find_all_videos
+[ ] Implement find_video_by_id
+[ ] Implement find_related_videos
+[ ] Implement find_videos_by_reference_id
+[ ] Implement find_videos_by_reference_ids
+[ ] Implement find_videos_by_user_id
+[ ] Implement find_videos_by_campaign_id
+[ ] Implement find_videos_by_text
+[ ] Implement find_videos_by_tags
+
+
+## Playlist Read APIs
+
+[ ] Implement find_all_playlists
+[ ] Implement find_playlist_by_id
+[ ] Implement find_playlist_by_ids
+[ ] Implement find_playlist_by_reference_id
+[ ] Implement find_playlist_by_reference_ids
+[ ] Implement find_playlist_for_player_id
+
+
+## Video Write APIs
+
+[*] Implement create_video
+[ ] Implement update_video
+[ ] Implement delete_video
+[ ] Implement get_upload_status
+[ ] Implement share_video
