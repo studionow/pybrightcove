@@ -44,7 +44,7 @@ class Connection(object):
         elif config.has_option('Connection', 'read_url'):
             self.read_url = config.get('Connection', 'read_url')
 
-        if 'write_url':
+        if 'write_url' in kwargs:
             self.write_url = kwargs['write_url']
         elif config.has_option('Connection', 'write_url'):
             self.write_url = config.get('Connection', 'write_url')
@@ -58,8 +58,45 @@ class Connection(object):
         params["filePath"] = open(file_to_upload, "rb")
         r = opener.open(self.write_url, params)
         return simplejson.loads(r.read())
-    
-    
+
+    def _get_response(self, **kwargs):
+        url = self.read_url + "?output=JSON&token=%s" % self.read_token
+        for key in kwargs:
+            url += "&%s=%s" % (key, kwargs[key])
+        req = urllib2.urlopen(url)
+        return simplejson.loads(req.read())
+
+    def find_all_videos(self, page_size=100, page_number=0,
+            sort_by=SortByType.CREATION_DATE, sort_order=SortOrderType.ASC,
+            fields=None, get_item_count=True):
+        """
+        page_size:
+            Integer	Number of items returned per page. A page is a subset of
+            all of the items that satisfy the request. The maximum page size
+            is 100; if you do not set this argument, or if you set it to an
+            integer > 100, your results will come back as if you had set
+            page_size=100.
+
+        page_number:
+            Integer	The zero-indexed number of the page to return.
+
+        sort_by:
+            The field by which to sort the results. A SortByType: One of
+            PUBLISH_DATE, CREATION_DATE, MODIFIED_DATE, PLAYS_TOTAL,
+            PLAYS_TRAILING_WEEK.
+
+        sort_order:
+            How to order the results: ascending (ASC) or descending (DESC).
+
+        fields:
+            List of the fields you wish to have populated in the videos
+            contained in the returned object. Passing None populates with all
+            fields.
+
+        get_item_count:
+            If set to True, return a total_count value with the payload.
+        """
+        return self._get_response(command="find_all_videos")
 
     def create_video(self, filename, video, do_checksum=True,
             create_multiple_renditions=True, preserve_source_rendition=True):

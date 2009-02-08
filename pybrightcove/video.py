@@ -18,10 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-
-class EconomicsEnum(object):
-    FREE = "FREE"
-    AD_SUPPORTED = "AD_SUPPORTED"
+from pybrightcove.enums import EconomicsEnum
 
 
 class Rendition(object):
