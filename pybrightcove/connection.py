@@ -57,7 +57,9 @@ class Connection(object):
         params = {"JSONRPC": simplejson.dumps(data)}
         params["filePath"] = open(file_to_upload, "rb")
         r = opener.open(self.write_url, params)
-        print r.read()
+        return simplejson.loads(r.read())
+    
+    
 
     def create_video(self, filename, video, do_checksum=True,
             create_multiple_renditions=True, preserve_source_rendition=True):
