@@ -3,12 +3,12 @@
 [ ] Add plumbing code on Connection object to perform GET requests and 
     de-serialize response data form JSON into the appropriate objects.
 [ ] Implement Exceptions
-[ ] Implement Related Objects (Enums, Collections, etc.)
+[*] Implement Related Objects (Enums, Collections, etc.)
 
 
 ## Video Read APIs
 
-[ ] Implement find_all_videos
+[*] Implement find_all_videos
 [ ] Implement find_video_by_id
 [ ] Implement find_related_videos
 [ ] Implement find_videos_by_reference_id
@@ -47,8 +47,8 @@
 
 ## Data Transfer Objects
 
-[ ] Implement Video
-[ ] Implement Playlist
-[ ] Implement Rendition
-[ ] Implement CuePoint
+[*] Implement Video
+[*] Implement Playlist
+[*] Implement Rendition
+[*] Implement CuePoint
 

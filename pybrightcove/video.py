@@ -23,12 +23,19 @@ from pybrightcove.enums import EconomicsEnum
 
 class Rendition(object):
 
-    def __init__(self):
+    def __init__(self, data=None):
         self._url = None
         self._encodingRate = None
         self._frameHeight = None
         self._frameWidth = None
         self._size = None
+
+        if data:
+            self._url = data['url']
+            self._encodingRate = data['encodingRate']
+            self._frameHeight = data['frameHeight']
+            self._frameWidth = data['frameWidth']
+            self._size = data['size']
 
     def get_url(self):
         return self._url
@@ -59,13 +66,21 @@ class Rendition(object):
 
 class CuePoint(object):
 
-    def __init__(self):
+    def __init__(self, data=None):
         self._name = None
         self._video_id = None
         self._time = None
         self._forceStop = None
         self._type = None
         self._metadata = None
+
+        if data:
+            self.name = data['name']
+            self._video_id = data['video_id']
+            self._time = data['time']
+            self.forceStop = data['forceStop']
+            self._type = data['type']
+            self.metadata = data['metadata']
 
     def get_name(self):
         return self._name
@@ -115,7 +130,7 @@ class CuePoint(object):
 
 class Video(object):
 
-    def __init__(self):
+    def __init__(self, data=None):
         self._name = None
         self._id = None
         self._referenceId = None
@@ -140,6 +155,34 @@ class Video(object):
         self._playsTotal = None
         self._playsTrailingWeek = None
 
+        if data:
+            self.name = data.get('name', None)
+            self._id = data.get('id', None)
+            self.referenceId = data.get('referenceId', None)
+            self._accountId = data.get('accountId', None)
+            self.shortDescription = data.get('shortDescription', None)
+            self.longDescription = data.get('longDescription', None)
+            self._FLVURL = data.get('FLVURL', None)
+            self._creationDate = data.get('creationDate', None)
+            self._publishedDate = data.get('publishedDate', None)
+            self._lastModifiedDate = data.get('lastModifiedDate', None)
+            self._startDate = data.get('startDate', None)
+            self._endDate = data.get('endDate', None)
+            self.linkURL = data.get('linkURL', None)
+            self.linkText = data.get('linkText', None)
+            self.tags = data.get('tags', None)
+            self._videoStillURL = data.get('videoStillURL', None)
+            self._thumbnailURL = data.get('thumbnailURL', None)
+            self._length = data.get('length', None)
+            self.economics = data.get('economics', None)
+            self._playsTotal = data.get('playsTotal', None)
+            self._playsTrailingWeek = data.get('playsTrailingWeek', None)
+
+            for rendition in data.get('renditions', []):
+                self.renditions.append(Rendition(data=rendition))
+            for cuePoint in data.get('cuePoints', []):
+                self.cuePoints.append(CuePoint(data=cuePoint))
+
     def get_name(self):
         return self._name
 
@@ -153,7 +196,8 @@ class Video(object):
         return self._referenceId
 
     def set_referenceId(self, refid):
-        self._referenceId = refid[:150]
+        if refid:
+            self._referenceId = refid[:150]
 
     def get_accountId(self):
         return self._accountId
@@ -162,13 +206,15 @@ class Video(object):
         return self._shortDescription
 
     def set_shortDescription(self, desc):
-        self._shortDescription = desc[:250]
+        if desc:
+            self._shortDescription = desc[:250]
 
     def get_longDescription(self):
         return self._longDescription
 
     def set_longDescription(self, desc):
-        self._longDescription = desc[:5000]
+        if desc:
+            self._longDescription = desc[:5000]
 
     def get_flvurl(self):
         return self._FLVURL
@@ -200,7 +246,7 @@ class Video(object):
         return self._linkURL
 
     def set_linkURL(self, url):
-        self.linkURL = url
+        self._linkURL = url
 
     def get_linkText(self):
         return self._linkText

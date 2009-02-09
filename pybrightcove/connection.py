@@ -22,8 +22,9 @@ import hashlib
 import simplejson
 import urllib2
 import cookielib
-from pybrightcove       import config, UserAgent
+from pybrightcove       import config, UserAgent, ItemCollection
 from pybrightcove.video import Video
+from pybrightcove.enums import SortByType, SortByOrderType
 
 
 class Connection(object):
@@ -67,7 +68,7 @@ class Connection(object):
         return simplejson.loads(req.read())
 
     def find_all_videos(self, page_size=100, page_number=0,
-            sort_by=SortByType.CREATION_DATE, sort_order=SortOrderType.ASC,
+            sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
             fields=None, get_item_count=True):
         """
         page_size:
@@ -96,7 +97,17 @@ class Connection(object):
         get_item_count:
             If set to True, return a total_count value with the payload.
         """
-        return self._get_response(command="find_all_videos")
+        fields_str = ""
+        if fields and isinstance(fields, (list, tuple)):
+            fields_str = ",".join(fields)
+        get_item_count_str = "false"
+        if get_item_count:
+            get_item_count_str = "true"
+        data = self._get_response(command="find_all_videos",
+            page_size=page_size, page_number=page_number, sort_by=sort_by,
+            sort_order=sort_order, fields=fields_str,
+            get_item_count=get_item_count_str)
+        return ItemCollection(data=data, collection_type="Video")
 
     def create_video(self, filename, video, do_checksum=True,
             create_multiple_renditions=True, preserve_source_rendition=True):
