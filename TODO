@@ -2,7 +2,7 @@
 
 [ ] Add plumbing code on Connection object to perform GET requests and 
     de-serialize response data form JSON into the appropriate objects.
-[ ] Implement Exceptions
+[*] Implement Exceptions
 [*] Implement Related Objects (Enums, Collections, etc.)
 
 
