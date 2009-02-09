@@ -50,4 +50,60 @@ class SortByType(object):
 
 
 class SortByOrderType(object):
-    pass
+    """
+    ASC:
+        Ascending
+
+    DESC:
+        Descending
+    """
+    ASC = "ASC"
+    DESC = "DESC"
+
+
+class UploadStatusEnum(object):
+    """
+    UPLOADING:
+        File is still uploading
+
+    PROCESSING:
+        Upload complete; being processed.
+
+    COMPLETE:
+        Upload and processing complete.
+
+    ERROR:
+        Error in upload or processing.
+    """
+    UPLOADING = "UPLOADING"
+    PROCESSING = "PROCESSING"
+    COMPLETE = "COMPLETE"
+    ERROR = "ERROR"
+
+
+class PlaylistTypeEnum(object):
+    """
+    EXPLICIT:
+        A manual playlist, the videos of which were added individually.
+
+    OLDEST_TO_NEWEST:
+        A smart playlist, ordered from oldest to newest by last-modified date.
+
+    NEWEST_TO_OLDEST:
+        A smart playlist, ordered from newest to oldest by last-modified date.
+
+    ALPHABETICAL:
+        A smart playlist, ordered alphabetically.
+
+    PLAYS_TOTAL:
+        A smart playlist, ordered by total plays.
+
+    PLAYS_TRAILING_WEEK:
+        A smart playlist, ordered by most plays in the past week.
+    """
+    EXPLICIT = "EXPLICIT"
+    OLDEST_TO_NEWEST = "OLDEST_TO_NEWEST"
+    NEWEST_TO_OLDEST = "NEWEST_TO_OLDEST"
+    ALPHABETICAL = "ALPHABETICAL"
+    PLAYS_TOTAL = "PLAYS_TOTAL"
+    PLAYS_TRAILING_WEEK = "PLAYS_TRAILING_WEEK"
