@@ -18,7 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from datetime import datetime
 from pybrightcove.enums import EconomicsEnum
+
+
+def _convert_tstamp(val):
+    if val:
+        return datetime.fromtimestamp(float(val)/1000)
 
 
 class Rendition(object):
@@ -163,11 +169,14 @@ class Video(object):
             self.shortDescription = data.get('shortDescription', None)
             self.longDescription = data.get('longDescription', None)
             self._FLVURL = data.get('FLVURL', None)
-            self._creationDate = data.get('creationDate', None)
-            self._publishedDate = data.get('publishedDate', None)
-            self._lastModifiedDate = data.get('lastModifiedDate', None)
-            self._startDate = data.get('startDate', None)
-            self._endDate = data.get('endDate', None)
+            self._creationDate = _convert_tstamp(
+                data.get('creationDate', None))
+            self._publishedDate = _convert_tstamp(
+                data.get('publishedDate', None))
+            self._lastModifiedDate = _convert_tstamp(
+                data.get('lastModifiedDate', None))
+            self._startDate = _convert_tstamp(data.get('startDate', None))
+            self._endDate = _convert_tstamp(data.get('endDate', None))
             self.linkURL = data.get('linkURL', None)
             self.linkText = data.get('linkText', None)
             self.tags = data.get('tags', None)
