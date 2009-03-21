@@ -9,14 +9,14 @@
 ## Video Read APIs
 
 [*] Implement find_all_videos
-[ ] Implement find_video_by_id
+[*] Implement find_video_by_id
 [ ] Implement find_related_videos
 [ ] Implement find_videos_by_reference_id
 [ ] Implement find_videos_by_reference_ids
 [ ] Implement find_videos_by_user_id
 [ ] Implement find_videos_by_campaign_id
 [ ] Implement find_videos_by_text
-[*] Implement find_videos_by_tags
+[* ] Implement find_videos_by_tags
 
 
 ## Playlist Read APIs

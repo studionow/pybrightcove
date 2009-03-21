@@ -71,7 +71,7 @@ class Connection(object):
 
     def _base_get_command(self, command, page_size=100, page_number=0,
             sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
-            fields=None, get_item_count=True, **kwargs):
+            fields=None, get_item_count=True, single=False, **kwargs):
         fields_str = ""
         if fields and isinstance(fields, (list, tuple)):
             fields_str = ",".join(fields)
@@ -84,6 +84,8 @@ class Connection(object):
             get_item_count=get_item_count_str, **kwargs)
         if 'error' in data:
             BrightcoveError.raise_exception(data)
+        if single:
+            return Video(data=data)
         return ItemCollection(data=data, collection_type="Video")
 
     def find_videos_by_tags(self, and_tags=None, or_tags=None, page_size=100,
@@ -171,6 +173,21 @@ class Connection(object):
             page_size=page_size, page_number=page_number, sort_by=sort_by,
             sort_order=sort_order, fields=fields,
             get_item_count=get_item_count)
+
+    def find_video_by_id(self, video_id, fields=None):
+        """
+        Finds a single video with the specified id.
+
+        video_id
+            The id of the video you would like to retrieve.
+
+        fields
+            A comma-separated list of the fields you wish to have populated
+            in the Video returned object. Passing null populates with all
+            fields.
+        """
+        return self._base_get_command(command="find_video_by_id",
+            video_id=video_id, fields=fields, single=True)
 
     def create_video(self, filename, video, do_checksum=True,
             create_multiple_renditions=True, preserve_source_rendition=True):
