@@ -26,14 +26,14 @@ class BrightcoveError(Exception):
         super(BrightcoveError, self).__init__(self.description)
 
     @staticmethod
-    def create_exception(data):
+    def raise_exception(data):
         error = BrightcoveError()
         error.raw_data = data
         if "code" in data and data["code"] in ERROR_MAP:
-            error = ERROR_MAP[data["code"]]["exception"]()
+            error = ERROR_MAP[data["code"]]()
             error.raw_data = data
 
-        return error
+        raise error
 
 
 class UnknownServerError(BrightcoveError):

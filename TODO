@@ -16,7 +16,7 @@
 [ ] Implement find_videos_by_user_id
 [ ] Implement find_videos_by_campaign_id
 [ ] Implement find_videos_by_text
-[ ] Implement find_videos_by_tags
+[*] Implement find_videos_by_tags
 
 
 ## Playlist Read APIs
