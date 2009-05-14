@@ -203,9 +203,11 @@ class Video(object):
         self._longDescription = None
         self._FLVURL = None
         self._renditions = None
+        self._videoFullLength = None
         self._creationDate = None
         self._publishedDate = None
         self._lastModifiedDate = None
+        self._itemState = None
         self._startDate = None
         self._endDate = None
         self._linkURL = None
@@ -215,6 +217,9 @@ class Video(object):
         self._thumbnailURL = None
         self._length = None
         self._economics = None
+        self._geoFiltered = None
+        self._geoFilteredCountries = None
+        self._geoFilteredExclude = None
         self._cuePoints = None
         self._playsTotal = None
         self._playsTrailingWeek = None
@@ -227,12 +232,15 @@ class Video(object):
             self.shortDescription = data.get('shortDescription', None)
             self.longDescription = data.get('longDescription', None)
             self._FLVURL = data.get('FLVURL', None)
+            self._videoFullLength = Rendition(
+                data.get('videoFullLength', None))
             self._creationDate = _convert_tstamp(
                 data.get('creationDate', None))
             self._publishedDate = _convert_tstamp(
                 data.get('publishedDate', None))
             self._lastModifiedDate = _convert_tstamp(
                 data.get('lastModifiedDate', None))
+            self._itemState = data.get('itemState', None)
             self._startDate = _convert_tstamp(data.get('startDate', None))
             self._endDate = _convert_tstamp(data.get('endDate', None))
             self.linkURL = data.get('linkURL', None)
@@ -241,12 +249,16 @@ class Video(object):
             self._videoStillURL = data.get('videoStillURL', None)
             self._thumbnailURL = data.get('thumbnailURL', None)
             self._length = data.get('length', None)
+            self._geoFiltered = data.get('geoFiltered', False)
+            self._geoFilteredExclude = data.get('geoFilteredExclude', True)
             self.economics = data.get('economics', None)
             self._playsTotal = data.get('playsTotal', None)
             self._playsTrailingWeek = data.get('playsTrailingWeek', None)
 
             for rendition in data.get('renditions', []):
                 self.renditions.append(Rendition(data=rendition))
+            for country in data.get('geoFilteredCountries', []):
+                self.geoFilteredCountries.append(country)
             for cuePoint in data.get('cuePoints', []):
                 self.cuePoints.append(CuePoint(data=cuePoint))
 
@@ -294,6 +306,16 @@ class Video(object):
     def set_renditions(self, renditions):
         self._renditions = renditions
 
+    def get_videoFullLength(self):
+        return self._videoFullLength
+
+    def set_videoFullLength(self, video_full_length):
+        if isinstance(video_full_length, Rendition):
+            self._videoFullLength = video_full_length
+        else:
+            raise TypeError("""videoFullLength should be a Rendition object.
+                You passed in a %s object.""" % type(video_full_length))
+
     def get_creationDate(self):
         return self._creationDate
 
@@ -302,6 +324,14 @@ class Video(object):
 
     def get_lastModifiedDate(self):
         return self._lastModifiedDate
+
+    def get_itemState(self):
+        return self._itemState
+
+    def set_itemState(self, state):
+        if state not in (ItemStateEnum.ACTIVE, ItemStateEnum.INACTIVE):
+            raise TypeError("Must be ACTIVE or INACTIVE.  You said %s" % state)
+        self._itemState = state
 
     def get_startDate(self):
         return self._startDate
@@ -347,6 +377,26 @@ class Video(object):
         else:
             self._economics = model
 
+    def get_geoFiltered(self):
+        return self._geoFiltered
+
+    def set_geoFiltered(self, filtered):
+        self._geoFilters = filtered
+
+    def get_geoFilteredExclude(self):
+        return self._geoFilteredExclude
+
+    def set_geoFilteredExclude(self, exclude_filter):
+        self._geoFilteredExclude = exclude_filter
+
+    def get_geoFilteredCountries(self):
+        if self._geoFilteredCountries == None:
+            self._geoFilteredCountries = []
+        return self._geoFilteredCountries
+
+    def set_geoFilteredCountries(self, filters):
+        self._geoFilteredCountries = filters
+
     def get_cuePoints(self):
         if self._cuePoints == None:
             self._cuePoints = []
@@ -390,6 +440,11 @@ class Video(object):
     renditions = property(get_renditions, set_renditions,
         doc = """An array of Renditions that represent the dynamic delivery
             renditions available for this Video.""")
+    videoFullLength = property(get_videoFullLength, set_videoFullLength,
+        doc = """A single Rendition that represents the the video file for
+            this Video. Note that this property can be accessed with the Media
+            API only with a special read or write token. See Accessing Video
+            Content with the Media API.""")
     creationDate = property(get_creationDate,
         doc = """The date this Video was created, represented as the number
             of milliseconds since the Unix epoch.""")
@@ -399,6 +454,10 @@ class Video(object):
     lastModifiedDate = property(get_lastModifiedDate,
         doc = """The date this Video was last modified, represented as the
             number of milliseconds since the Unix epoch.""")
+    itemState = property(get_itemState, set_itemState,
+        doc = """An ItemStateEnum. One of ACTIVE, INACTIVE, or DELETED. You can
+            set this property only to ACTIVE or INACTIVE; you cannot delete a
+            video by setting its itemState to DELETED.""")
     startDate = property(get_startDate,
         doc = """The first date this Video is available to be played,
             represented as the number of milliseconds since the Unix epoch.""")
@@ -423,6 +482,18 @@ class Video(object):
     economics = property(get_economics, set_economics,
         doc = """Either FREE or AD_SUPPORTED. AD_SUPPORTED means that ad
             requests are enabled for this Video.""")
+    geoFiltered = property(get_geoFiltered, set_geoFiltered,
+        doc = """True indicates that the video is geo-restricted.""")
+    geoFilteredCountries = property(get_geoFilteredCountries,
+        set_geoFilteredCountries,
+        doc = """A list of the ISO-3166 two-letter codes of the countries
+            to enforce geo-restriction rules on. Use lowercase for the
+            country codes.""")
+    geoFilteredExclude = property(get_geoFilteredExclude,
+        set_geoFilteredExclude,
+        doc = """If true, the video can be viewed in all countries except
+            those listed in geoFilteredCountries; if false, the video can
+            be viewed only in the countries listed in geoFilteredCountries.""")
     cuePoints = property(get_cuePoints, set_cuePoints,
         doc = """A List of the CuePoints objects assigned to this Video.""")
     playsTotal = property(get_playsTotal,
@@ -442,10 +513,12 @@ class Video(object):
             'longDescription': self.longDescription,
             'FLVURL': self.FLVURL,
             'renditions': self.renditions,
+            'videoFullLength': self.videoFullLength,
             'creationDate': self.creationDate,
             'publishedDate': self.publishedDate,
             'lastModifiedDate': self.lastModifiedDate,
             'startDate': self.startDate,
+            'itemState': self.itemState,
             'endDate': self.endDate,
             'linkURL': self.linkURL,
             'linkText': self.linkText,
@@ -454,6 +527,9 @@ class Video(object):
             'thumbnailURL': self.thumbnailURL,
             'length': self.length,
             'economics': self.economics,
+            'geoFiltered': self.geoFiltered,
+            'geoFilteredExclude': self.geoFilteredExclude,
+            'geoFilteredCountries': self.geoFilteredCountries,
             'cuePoints': self.cuePoints,
             'playsTotal': self.playsTotal,
             'playsTrailingWeek': self.playsTrailingWeek}
