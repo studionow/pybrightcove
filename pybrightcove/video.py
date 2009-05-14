@@ -136,7 +136,7 @@ class Rendition(object):
     def set_remoteStreamName(self, stream_name):
         self._remoteStreamName = stream_name
 
-    def get_videoDuration(self, duration):
+    def get_videoDuration(self):
         return self._videoDuration
 
     def set_videoDuration(self, duration):
