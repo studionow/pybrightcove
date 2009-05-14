@@ -77,7 +77,7 @@ class Connection(object):
             sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
             video_fields=None, get_item_count=True, single=False, **kwargs):
         fields_str = ""
-        if fields and isinstance(video_fields, (list, tuple)):
+        if video_fields and isinstance(video_fields, (list, tuple)):
             for field in video_fields:
                 if field not in PublicVideoFieldsEnum.__dict__.values():
                     raise TypeError('Invalid field value supplied.')
