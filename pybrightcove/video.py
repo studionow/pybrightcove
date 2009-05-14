@@ -19,7 +19,7 @@
 # THE SOFTWARE.
 
 from datetime import datetime
-from pybrightcove.enums import EconomicsEnum
+from pybrightcove.enums import EconomicsEnum, ItemStateEnum, VideoCodecEnum
 
 
 def _convert_tstamp(val):
@@ -93,6 +93,10 @@ class Rendition(object):
         self._frameHeight = None
         self._frameWidth = None
         self._size = None
+        self._remoteUrl = None
+        self._remoteStreamName = None
+        self._videoDuration = None
+        self._videoCodec = None
 
         if data:
             self._url = data['url']
@@ -100,6 +104,10 @@ class Rendition(object):
             self._frameHeight = data['frameHeight']
             self._frameWidth = data['frameWidth']
             self._size = data['size']
+            self._remoteUrl = data['remoteUrl']
+            self._remoteStreamName = data['remoteStreamName']
+            self._videoDuration = data['videoDuration']
+            self._videoCodec = data['videoCodec']
 
     def get_url(self):
         return self._url
@@ -116,6 +124,33 @@ class Rendition(object):
     def get_size(self):
         return self._size
 
+    def get_remoteUrl(self):
+        return self._remoteUrl
+
+    def set_remoteUrl(self, url):
+        self._remoteUrl = url
+
+    def get_remoteStreamName(self):
+        return self._remoteStreamName
+
+    def set_remoteStreamName(self, stream_name):
+        self._remoteStreamName = stream_name
+
+    def get_videoDuration(self, duration):
+        return self._videoDuration
+
+    def set_videoDuration(self, duration):
+        self._videoDuration = duration
+
+    def get_videoCodec(self):
+        return self._videoCodec
+
+    def set_videoCodec(self, codec):
+        if codec not in (VideoCodecEnum.SORENSON, VideoCodecEnum.ON2,
+            VideoCodecEnum.H264):
+            raise TypeError("Valid values are SORENSON, ON2, or H264.")
+        self._videoCodec = codec
+
     url = property(get_url,
         doc="The URL of the rendition file.")
     encodingRate = property(get_encodingRate,
@@ -126,6 +161,22 @@ class Rendition(object):
         doc="The rendition's display width, in pixels.")
     size = property(get_size,
         doc="The file size of the rendition, in bytes.")
+    remoteUrl = property(get_remoteUrl, set_remoteUrl,
+        doc="""Required, for remote assets. The complete path to the file
+            hosted on the remote server. If the file is served using
+            progressive download, then you must include the file name and
+            extension for the file. You can also use a URL that re-directs
+            to a URL that includes the file name and extension. If the file
+            is served using Flash streaming, use the remoteStreamName
+            attribute to provide the stream name.""")
+    remoteStream = property(get_remoteStreamName, set_remoteStreamName,
+        doc="""[Optional - required for streaming remote assets only] A stream
+            name for Flash streaming appended to the value of the remoteUrl
+            property.""")
+    videoDuration = property(get_videoDuration, set_videoDuration,
+        doc="Required. The length of the remote video asset in milliseconds.")
+    videoCodec = property(get_videoCodec, set_videoCodec,
+        doc="Required. Valid values are SORENSON, ON2, and H264.")
 
 
 class CuePoint(object):
