@@ -25,6 +25,7 @@ import cookielib
 from pybrightcove       import config, UserAgent, ItemCollection
 from pybrightcove.video import Video
 from pybrightcove.enums import SortByType, SortByOrderType
+from pybrightcove.enums import PublicVideoFieldsEnum
 from pybrightcove.exceptions import BrightcoveError
 
 
@@ -74,16 +75,19 @@ class Connection(object):
 
     def _base_get_command(self, command, page_size=100, page_number=0,
             sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
-            fields=None, get_item_count=True, single=False, **kwargs):
+            video_fields=None, get_item_count=True, single=False, **kwargs):
         fields_str = ""
-        if fields and isinstance(fields, (list, tuple)):
-            fields_str = ",".join(fields)
+        if fields and isinstance(video_fields, (list, tuple)):
+            for field in video_fields:
+                if field not in PublicVideoFieldsEnum.__dict__.values():
+                    raise TypeError('Invalid field value supplied.')
+            fields_str = ",".join(video_fields)
         get_item_count_str = "false"
         if get_item_count:
             get_item_count_str = "true"
         data = self._get_response(command=command,
             page_size=page_size, page_number=page_number, sort_by=sort_by,
-            sort_order=sort_order, fields=fields_str,
+            sort_order=sort_order, video_fields=fields_str,
             get_item_count=get_item_count_str, **kwargs)
         if 'error' in data:
             BrightcoveError.raise_exception(data)
@@ -93,7 +97,7 @@ class Connection(object):
 
     def find_all_videos(self, page_size=100, page_number=0,
             sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
-            fields=None, get_item_count=True):
+            video_fields=None, get_item_count=True):
         """
         Find all videos in the Brightcove media library for this account.
 
@@ -115,36 +119,39 @@ class Connection(object):
         sort_order:
             How to order the results: ascending (ASC) or descending (DESC).
 
-        fields:
+        video_fields:
             List of the fields you wish to have populated in the videos
             contained in the returned object. Passing None populates with all
-            fields.
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
 
         get_item_count:
             If set to True, return a total_count value with the payload.
         """
         return self._base_get_command(command="find_all_videos",
             page_size=page_size, page_number=page_number, sort_by=sort_by,
-            sort_order=sort_order, fields=fields,
+            sort_order=sort_order, video_fields=video_fields,
             get_item_count=get_item_count)
 
-    def find_video_by_id(self, video_id, fields=None):
+    def find_video_by_id(self, video_id, video_fields=None):
         """
         Finds a single video with the specified id.
 
         video_id
             The id of the video you would like to retrieve.
 
-        fields
-            A comma-separated list of the fields you wish to have populated
-            in the Video returned object. Passing null populates with all
-            fields.
+        video_fields:
+            List of the fields you wish to have populated in the videos
+            contained in the returned object. Passing None populates with all
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
         """
         return self._base_get_command(command="find_video_by_id",
-            video_id=video_id, fields=fields, single=True)
+            video_id=video_id, video_fields=video_fields, single=True)
 
     def find_related_videos(self, video_id=None, reference_id=None,
-            page_size=100, page_number=0, fields=None, get_item_count=True):
+            page_size=100, page_number=0, video_fields=None,
+            get_item_count=True):
         """
         Finds videos related to the given video. Combines the name and short
         description of the given video and searches for any partial matches in
@@ -171,35 +178,37 @@ class Connection(object):
         page_number:
             Integer	The zero-indexed number of the page to return.
 
-        fields:
+        video_fields:
             List of the fields you wish to have populated in the videos
             contained in the returned object. Passing None populates with all
-            fields.
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum..
 
         get_item_count:
             If set to True, return a total_count value with the payload.
         """
         return self._base_get_command(command="find_related_videos",
             video_id=video_id, reference_id=reference_id, page_size=page_size,
-            page_number=page_number, fields=fields,
+            page_number=page_number, video_fields=video_fields,
             get_item_count=get_item_count)
 
-    def find_videos_by_ids(self, video_ids, fields=None):
+    def find_videos_by_ids(self, video_ids, video_fields=None):
         """
         Find multiple videos, given their ids.
 
         video_ids
             The list of video ids for the videos we'd like to retrieve.
 
-        fields
+        video_fields:
             List of the fields you wish to have populated in the videos
-            contained in the returned object. Passing null populates with all
-            fields.
+            contained in the returned object. Passing None populates with all
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
         """
         return self._base_get_command(command="find_videos_by_ids",
-            video_ids=video_ids, fields=fields)
+            video_ids=video_ids, video_fields=video_fields)
 
-    def find_video_by_reference_id(self, reference_id, fields=None):
+    def find_video_by_reference_id(self, reference_id, video_fields=None):
         """
         Find a video based on its publisher-assigned reference id.
 
@@ -207,32 +216,34 @@ class Connection(object):
             The publisher-assigned reference id for the video we're
             searching for.
 
-        fields
+        video_fields:
             List of the fields you wish to have populated in the videos
-            contained in the returned object. Passing null populates with all
-            fields.
+            contained in the returned object. Passing None populates with all
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
         """
         return self._base_get_command(command="find_video_by_reference_id",
-            reference_id=reference_id, fields=fields, single=True)
+            reference_id=reference_id, video_fields=video_fields, single=True)
 
-    def find_videos_by_reference_ids(self, reference_ids, fields=None):
+    def find_videos_by_reference_ids(self, reference_ids, video_fields=None):
         """
         Find multiple videos based on their publisher-assigned reference ids.
 
         reference_ids
             The list of reference ids for the videos we'd like to retrieve
 
-        fields
+        video_fields:
             List of the fields you wish to have populated in the videos
-            contained in the returned object. Passing null populates with all
-            fields.
+            contained in the returned object. Passing None populates with all
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
         """
         return self._base_get_command(command="find_videos_by_reference_ids",
-            reference_ids=reference_ids, fields=fields)
+            reference_ids=reference_ids, video_fields=video_fields)
 
     def find_videos_by_user_id(self, user_id, page_size=100, page_number=0,
             sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
-            fields=None, get_item_count=True):
+            video_fields=None, get_item_count=True):
         """
         Retrieves the videos uploaded by the specified user id. This method can
         be used to find videos submitted using the consumer-generated media
@@ -259,22 +270,24 @@ class Connection(object):
         sort_order:
             How to order the results: ascending (ASC) or descending (DESC).
 
-        fields:
+        video_fields:
             List of the fields you wish to have populated in the videos
             contained in the returned object. Passing None populates with all
-            fields.
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
 
         get_item_count:
             If set to True, return a total_count value with the payload.
         """
         return self._base_get_command(command="find_videos_by_user_id",
             user_id=user_id, page_size=page_size, page_number=page_number,
-            sort_by=sort_by, sort_order=sort_order, fields=fields,
+            sort_by=sort_by, sort_order=sort_order, video_fields=video_fields,
             get_item_count=get_item_count)
 
     def find_videos_by_campaign_id(self, campaign_id, page_size=100,
             page_number=0, sort_by=SortByType.CREATION_DATE,
-            sort_order=SortByOrderType.ASC, fields=None, get_item_count=True):
+            sort_order=SortByOrderType.ASC, video_fields=None,
+            get_item_count=True):
         """
         Gets all the videos associated with the given campaign id. Campaigns
         are a feature of the consumer-generated media (CGM) module
@@ -300,10 +313,11 @@ class Connection(object):
         sort_order:
             How to order the results: ascending (ASC) or descending (DESC).
 
-        fields:
+        video_fields:
             List of the fields you wish to have populated in the videos
             contained in the returned object. Passing None populates with all
-            fields.
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
 
         get_item_count:
             If set to True, return a total_count value with the payload.
@@ -311,10 +325,10 @@ class Connection(object):
         return self._base_get_command(command="find_videos_by_campaign_id",
             campaign_id=campaign_id, page_size=page_size,
             page_number=page_number, sort_by=sort_by, sort_order=sort_order,
-            fields=fields, get_item_count=get_item_count)
+            video_fields=video_fields, get_item_count=get_item_count)
 
     def find_videos_by_text(self, text, page_size=100, page_number=0,
-        fields=None, get_item_count=True):
+        video_fields=None, get_item_count=True):
         """
         Searches through all the videos in this account, and returns a
         collection of videos whose name, short description, or long
@@ -333,21 +347,23 @@ class Connection(object):
         page_number:
             Integer	The zero-indexed number of the page to return.
 
-        fields:
+        video_fields:
             List of the fields you wish to have populated in the videos
             contained in the returned object. Passing None populates with all
-            fields.
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
 
         get_item_count:
             If set to True, return a total_count value with the payload.
         """
         return self._base_get_command(command="find_videos_by_text",
             text=text, page_size=page_size, page_number=page_number,
-            fields=fields, get_item_count=get_item_count)
+            video_fields=video_fields, get_item_count=get_item_count)
 
     def find_videos_by_tags(self, and_tags=None, or_tags=None, page_size=100,
             page_number=0, sort_by=SortByType.MODIFIED_DATE,
-            sort_order=SortByOrderType.ASC, get_item_count=True, fields=None):
+            sort_order=SortByOrderType.ASC, get_item_count=True,
+            video_fields=None):
         """
         Performs a search on all the tags of the videos in this account,
         and returns a collection of videos that contain the specified tags.
@@ -378,10 +394,11 @@ class Connection(object):
         sort_order:
             How to order the results: ascending (ASC) or descending (DESC).
 
-        fields:
+        video_fields:
             List of the fields you wish to have populated in the videos
             contained in the returned object. Passing None populates with all
-            fields.
+            fields.  The items in the list should be values from the
+            pybrightcove.enums.PublicVideoFieldsEnum enum.
 
         get_item_count:
             If set to True, return a total_count value with the payload.
@@ -392,7 +409,7 @@ class Connection(object):
 
         return self._base_get_command(command="find_videos_by_tags",
             page_size=page_size, page_number=page_number, sort_by=sort_by,
-            sort_order=sort_order, fields=fields,
+            sort_order=sort_order, video_fields=video_fields,
             get_item_count=get_item_count, and_tags=and_tags,
             or_tags=or_tags)
 
