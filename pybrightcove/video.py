@@ -43,46 +43,46 @@ class Image(object):
             self._remoteUrl = data["remoateUrl"]
             self._displayName = data["displayName"]
 
-        def get_id(self):
-            return self._id
-
-        def get_referenceId(self):
-            return self._referenceId
-
-        def set_referenceId(self, referenceId):
-            self._referenceId = referenceId
-
-        def get_type(self):
-            return self._type
-
-        def set_type(self, image_type):
-            self._type = image_type
-
-        def get_remoteUrl(self):
-            return self._remoteUrl
-
-        def set_remoteUrl(self, remote_url):
-            self._remoteUrl = remote_url
-
-        def get_displayName(self):
-            return self._displayName
-
-        def set_displayName(self, display_name):
-            self._displayName = display_name
-
-        id = property(get_id,
-            doc="""A number that uniquely identifies this Image.
-                This id is automatically assigned by Brightcove when
-                the Image is created.""")
-        referenceId = property(get_referenceId, set_referenceId,
-            doc="""A user-specified id that uniquely identifies this Image.""")
-        type = property(get_type, set_type,
-            doc="""THUMBNAIL or VIDEO_STILL. The type is writable and required
-                when you create an Image; it cannot subsequently be
-                changed.""")
-        displayName = property(get_displayName, set_displayName,
-            doc="""The name of the asset, which will be displayed in the
-                Media module.""")
+    def get_id(self):
+        return self._id
+    
+    def get_referenceId(self):
+        return self._referenceId
+    
+    def set_referenceId(self, referenceId):
+        self._referenceId = referenceId
+    
+    def get_type(self):
+        return self._type
+    
+    def set_type(self, image_type):
+        self._type = image_type
+    
+    def get_remoteUrl(self):
+        return self._remoteUrl
+    
+    def set_remoteUrl(self, remote_url):
+        self._remoteUrl = remote_url
+    
+    def get_displayName(self):
+        return self._displayName
+    
+    def set_displayName(self, display_name):
+        self._displayName = display_name
+    
+    id = property(get_id,
+        doc="""A number that uniquely identifies this Image.
+            This id is automatically assigned by Brightcove when
+            the Image is created.""")
+    referenceId = property(get_referenceId, set_referenceId,
+        doc="""A user-specified id that uniquely identifies this Image.""")
+    type = property(get_type, set_type,
+        doc="""THUMBNAIL or VIDEO_STILL. The type is writable and required
+            when you create an Image; it cannot subsequently be
+            changed.""")
+    displayName = property(get_displayName, set_displayName,
+        doc="""The name of the asset, which will be displayed in the
+            Media module.""")
 
 
 class Rendition(object):
