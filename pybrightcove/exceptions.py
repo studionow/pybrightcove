@@ -212,6 +212,27 @@ class NonmatchingChecksumError(BrightcoveError):
     code = 308
 
 
+class RemoteAssetsDisabledError(BrightcoveError):
+    description = """This account is not approved to use remote assets."""
+    cause = """You attempted to create or update a remote asset, but your
+            account is not enabled for this feature."""
+    code = 309
+
+
+class InvalidCountryCodeError(BrightcoveError):
+    description = """The following country codes are not supported for
+        geo-restriction:"""
+    cause = "You used an invalid country code for geo-restriction."
+    code = 310
+
+
+class GeoRestrictionDisabledError(BrightcoveError):
+    description = "This account is not approved to use geo-restriction"
+    cause = """You attempted to set geo-restriction properties for a video,
+            but your account is not enabled for this feature."""
+    code = 311
+
+
 ERROR_MAP = {}
 ERROR_MAP[100] = UnknownServerError
 ERROR_MAP[101] = ServiceDeployingError
@@ -236,3 +257,6 @@ ERROR_MAP[305] = IncompatibleValueError
 ERROR_MAP[306] = FileFormatError
 ERROR_MAP[307] = ObjectNotFoundError
 ERROR_MAP[308] = NonmatchingChecksumError
+ERROR_MAP[309] = RemoteAssetsDisabledError
+ERROR_MAP[310] = InvalidCountryCodeError
+ERROR_MAP[311] = GeoRestrictionDisabledError
