@@ -283,6 +283,18 @@ class CuePoint(object):
     metadata = property(get_metadata, set_metadata,
         doc = "A string that can be passed along with a CODE cue point.")
 
+    def to_dict(self):
+        data = {
+            'name': self.name,
+            'video_id': self.video_id,
+            'time': self.time,
+            'forceStop': self.forceStop,
+            'cue_type': self.cue_type}
+        for key in data.keys():
+            if data[key] == None:
+                data.pop(key)
+        return data
+
 
 class Video(object):
 
