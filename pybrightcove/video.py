@@ -87,6 +87,17 @@ class Image(object):
         doc="""The name of the asset, which will be displayed in the
             Media module.""")
 
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'referenceId': self.referenceId,
+            'type': self.type,
+            'displayName': self.displayName}
+        for key in data.keys():
+            if data[key] == None:
+                data.pop(key)
+        return data
+
 
 class Rendition(object):
 
