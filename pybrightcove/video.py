@@ -28,6 +28,17 @@ def _convert_tstamp(val):
 
 
 class Image(object):
+    """
+    This object represents metadata about an image file in your account. Images
+    are associated with videos as thumbnail images or video still images. An
+    image can be a JPEG, GIF, or PNG-formatted image. Note that when creating a
+    new image asset, the only property that is required is type. If you are not
+    uploading a file, the remoteUrl property is also required.
+
+    For more information, see Adding Images to Videos with the Media API [1].
+
+    [1] http://help.brightcove.com/developer/docs/mediaapi/add_image.cfm
+    """
 
     def __init__(self, data=None):
         self._id = None
@@ -100,6 +111,16 @@ class Image(object):
 
 
 class Rendition(object):
+    """
+    The Rendition object represents one of the dynamic delivery renditions of a
+    video. A Video should have not more than 10 Renditions.
+
+    For more information, see Using dynamic delivery [1] and Creating videos
+    for dynamic delivery [2].
+
+    [1] http://help.brightcove.com/publisher/docs/media/mbr.cfm
+    [2] http://help.brightcove.com/developer/docs/mediaapi/create-mbr.cfm
+    """
 
     def __init__(self, data=None):
         self._url = None
@@ -216,6 +237,15 @@ class Rendition(object):
 
 
 class CuePoint(object):
+    """
+    The CuePoint object is a marker set at a precise time point in the duration
+    of a video. You can use cue points to trigger mid-roll ads or to separate
+    chapters or scenes in a long-form video.
+
+    For more information, see Setting CuePoints with the Media API [1].
+
+    [1] http://help.brightcove.com/developer/docs/mediaapi/cue-points.cfm
+    """
 
     def __init__(self, data=None):
         self._name = None
@@ -297,6 +327,10 @@ class CuePoint(object):
 
 
 class Video(object):
+    """
+    The Video object is an aggregation of metadata and asset information
+    associated with a video.
+    """
 
     def __init__(self, data=None):
         self._name = None

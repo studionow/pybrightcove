@@ -23,6 +23,7 @@ from pybrightcove.video import Video
 
 
 class Playlist(object):
+    """The Playlist object is a collection of Videos."""
 
     def __init__(self, data=None):
         self._id = None
