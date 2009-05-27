@@ -200,6 +200,20 @@ class Rendition(object):
     videoCodec = property(get_videoCodec, set_videoCodec,
         doc="Required. Valid values are SORENSON, ON2, and H264.")
 
+    def to_dict(self):
+        data = {
+            'url': self.url,
+            'encodingRate': self.encodingRate,
+            'frameHeight': self.frameHeight,
+            'frameWidth': self.frameWidth,
+            'size': self.size,
+            'remoteUrl': self.remoteUrl,
+            'remoteStream': self.remoteStream}
+        for key in data.keys():
+            if data[key] == None:
+                data.pop(key)
+        return data
+
 
 class CuePoint(object):
 
