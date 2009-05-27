@@ -45,40 +45,43 @@ class Image(object):
 
     def get_id(self):
         return self._id
-    
+
     def get_referenceId(self):
         return self._referenceId
-    
+
     def set_referenceId(self, referenceId):
         self._referenceId = referenceId
-    
+
     def get_type(self):
         return self._type
-    
+
     def set_type(self, image_type):
         self._type = image_type
-    
+
     def get_remoteUrl(self):
         return self._remoteUrl
-    
+
     def set_remoteUrl(self, remote_url):
         self._remoteUrl = remote_url
-    
+
     def get_displayName(self):
         return self._displayName
-    
+
     def set_displayName(self, display_name):
         self._displayName = display_name
-    
+
     id = property(get_id,
         doc="""A number that uniquely identifies this Image.
             This id is automatically assigned by Brightcove when
             the Image is created.""")
+
     referenceId = property(get_referenceId, set_referenceId,
         doc="""A user-specified id that uniquely identifies this Image.""")
+
     type = property(get_type, set_type,
         doc="""THUMBNAIL or VIDEO_STILL. The type is writable and required
             when you create an Image; it cannot subsequently be
+
             changed.""")
     displayName = property(get_displayName, set_displayName,
         doc="""The name of the asset, which will be displayed in the
@@ -153,14 +156,19 @@ class Rendition(object):
 
     url = property(get_url,
         doc="The URL of the rendition file.")
+
     encodingRate = property(get_encodingRate,
         doc="The rendition's encoding rate in bits per second.")
+
     frameHeight = property(get_frameHeight,
         doc="The rendition's display height, in pixels.")
+
     frameWidth = property(get_frameWidth,
         doc="The rendition's display width, in pixels.")
+
     size = property(get_size,
         doc="The file size of the rendition, in bytes.")
+
     remoteUrl = property(get_remoteUrl, set_remoteUrl,
         doc="""Required, for remote assets. The complete path to the file
             hosted on the remote server. If the file is served using
@@ -169,12 +177,15 @@ class Rendition(object):
             to a URL that includes the file name and extension. If the file
             is served using Flash streaming, use the remoteStreamName
             attribute to provide the stream name.""")
+
     remoteStream = property(get_remoteStreamName, set_remoteStreamName,
         doc="""[Optional - required for streaming remote assets only] A stream
             name for Flash streaming appended to the value of the remoteUrl
             property.""")
+
     videoDuration = property(get_videoDuration, set_videoDuration,
         doc="Required. The length of the remote video asset in milliseconds.")
+
     videoCodec = property(get_videoCodec, set_videoCodec,
         doc="Required. Valid values are SORENSON, ON2, and H264.")
 
@@ -223,15 +234,19 @@ class CuePoint(object):
 
     name = property(get_name,
         doc = "A name for the cue point, so that you can refer to it.")
+
     video_id = property(get_video_id,
         doc = """A comma-separated list of the ids of one or more videos
                 that this cue point applies to.""")
+
     time = property(get_time,
         doc = """The time of the cue point, measured in milliseconds from
                 the beginning of the video.""")
+
     forceStop = property(get_forceStop, set_forceStop,
         doc = """If true, the video stops playback at the cue point. This
                 setting is valid only for AD type cue points.""")
+
     cue_type = property(get_type,
         doc = """An integer code corresponding to the type of cue point.
                 One of 0 (AD), 1 (CODE), or 2 (CHAPTER). An AD cue point
@@ -239,6 +254,7 @@ class CuePoint(object):
                 point indicates a chapter or scene break in the video.
                 A CODE cue point causes an event that you can listen
                 for and respond to.""")
+
     metadata = property(get_metadata, set_metadata,
         doc = "A string that can be passed along with a CODE cue point.")
 
@@ -462,94 +478,120 @@ class Video(object):
     def get_playsTrailingWeek(self):
         return self._playsTrailingWeek
 
-
     name = property(get_name, set_name,
         doc = """The title of this Video. The name is a required property when
             you create a video.""")
+
     id = property(get_id,
         doc = """A number that uniquely identifies this Video, assigned by
             Brightcove when the Video is created.""")
+
     referenceId = property(get_referenceId, set_referenceId,
         doc = """A user-specified id that uniquely identifies this Video.
             ReferenceID can be used as a foreign-key to identify this video
             in another system.""")
+
     accountId = property(get_accountId,
         doc = """A number, assigned by Brightcove, that uniquely identifies
             the account to which this Video belongs.""")
+
     shortDescription = property(get_shortDescription, set_shortDescription,
         doc = """A short description describing this Video, limited to 256
             characters. The shortDescription is a required property when you
             create a video.""")
+
     longDescription = property(get_longDescription, set_longDescription,
         doc = """A longer description of this Video, limited to 5000
             characters.""")
+
     FLVURL = property(get_flvurl,
         doc = """The URL of the video file for this Video. Note that this
             property can be accessed with the Media API only with a special
             read or write token. See Accessing Video Content with the Media
             API.""")
+
     renditions = property(get_renditions, set_renditions,
         doc = """An array of Renditions that represent the dynamic delivery
             renditions available for this Video.""")
+
     videoFullLength = property(get_videoFullLength, set_videoFullLength,
         doc = """A single Rendition that represents the the video file for
             this Video. Note that this property can be accessed with the Media
             API only with a special read or write token. See Accessing Video
             Content with the Media API.""")
+
     creationDate = property(get_creationDate,
         doc = """The date this Video was created, represented as the number
             of milliseconds since the Unix epoch.""")
+
     publishedDate = property(get_publishedDate,
         doc = """The date this Video was last made active, represented as the
             number of milliseconds since the Unix epoch.""")
+
     lastModifiedDate = property(get_lastModifiedDate,
         doc = """The date this Video was last modified, represented as the
             number of milliseconds since the Unix epoch.""")
+
     itemState = property(get_itemState, set_itemState,
         doc = """An ItemStateEnum. One of ACTIVE, INACTIVE, or DELETED. You can
             set this property only to ACTIVE or INACTIVE; you cannot delete a
             video by setting its itemState to DELETED.""")
+
     startDate = property(get_startDate,
         doc = """The first date this Video is available to be played,
             represented as the number of milliseconds since the Unix epoch.""")
+
     endDate = property(get_endDate,
         doc = """The last date this Video is available to be played,
             represented as the number of milliseconds since the Unix epoch.""")
+
     linkURL = property(get_linkURL, set_linkURL,
         doc = """An optional URL to a related item.""")
+
     linkText = property(get_linkText, set_linkText,
         doc = """The text displayed for the linkURL.""")
+
     tags = property(get_tags, set_tags,
         doc = """A list of Strings representing the tags assigned to this
             Video.""")
+
     videoStillURL = property(get_videoStillURL,
         doc = """The URL to the video still image associated with this
             Video. Video stills are 480x360 pixels.""")
+
     thumbnailURL = property(get_thumbnailURL,
         doc = """The URL to the thumbnail image associated with this Video.
             Thumbnails are 120x90 pixels.""")
+
     length = property(get_length,
         doc = "The length of this video in milliseconds.")
+
     economics = property(get_economics, set_economics,
         doc = """Either FREE or AD_SUPPORTED. AD_SUPPORTED means that ad
             requests are enabled for this Video.""")
+
     geoFiltered = property(get_geoFiltered, set_geoFiltered,
         doc = """True indicates that the video is geo-restricted.""")
+
     geoFilteredCountries = property(get_geoFilteredCountries,
         set_geoFilteredCountries,
         doc = """A list of the ISO-3166 two-letter codes of the countries
             to enforce geo-restriction rules on. Use lowercase for the
             country codes.""")
+
     geoFilteredExclude = property(get_geoFilteredExclude,
         set_geoFilteredExclude,
         doc = """If true, the video can be viewed in all countries except
             those listed in geoFilteredCountries; if false, the video can
             be viewed only in the countries listed in geoFilteredCountries.""")
+
     cuePoints = property(get_cuePoints, set_cuePoints,
         doc = """A List of the CuePoints objects assigned to this Video.""")
+
     playsTotal = property(get_playsTotal,
         doc = """How many times this Video has been played since its
             creation.""")
+
     playsTrailingWeek = property(get_playsTrailingWeek,
         doc = """How many times this Video has been played within the past
             seven days, exclusive of today.""")
