@@ -415,6 +415,27 @@ class Connection(object):
 
     def create_video(self, filename, video, do_checksum=True,
             create_multiple_renditions=True, preserve_source_rendition=True):
+        """
+        filename:
+            The name of hte file that's being uploaded.
+
+        video:
+            The metadata for the video you'd like to create.
+
+        create_multiple_renditions:
+            If the file is a supported transcodeable type, this optional flag
+            can be used to control the number of transcoded renditions.
+            If true (default), multiple renditions at varying encoding rates
+            and dimensions are created. Setting this to false will cause a
+            single transcoded VP6 rendition to be created at the standard
+            encoding rate and dimensions.
+
+        preserve_source_rendition:
+            If true (default) and if the video file is H.264 encoded and if
+            create_multiple_renditions=true, then multiple VP6 renditions are
+            created and in addition the H.264 source is retained as an
+            additional rendition.
+        """
         data = {"method": "create_video"}
         params = {"token": self.write_token}
         params["create_multiple_renditions"] = create_multiple_renditions
