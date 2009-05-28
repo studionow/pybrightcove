@@ -34,10 +34,10 @@ from pybrightcove.enums import ItemStateEnum, EconomicsEnum
 
 
 class VideoTest(unittest.TestCase):
-    ## datetime.datetime(2009, 5, 27, 22, 58, 31, 711678)
-    testDate = 1243483111000L
 
     def setUp(self):
+        self.validTestDate = datetime(2009, 5, 27, 22, 58, 31)
+        self.testDate = 1243483111000L
         self.data = {
             'name': "Test Video",
             'id': 23424245,
@@ -64,8 +64,9 @@ class VideoTest(unittest.TestCase):
             'geoFilteredCountries': ['us', ],
             'playsTotal': 50,
             'playsTrailingWeek': 7}
+        self.video = Video(self.data)
 
-    def test_deserialization(self):
+    def test_serialization(self):
         v = Video(data=self.data)
         new_dict = v.to_dict()
         dt = datetime(2009, 5, 27, 22, 58, 31)
@@ -78,89 +79,91 @@ class VideoTest(unittest.TestCase):
                 else:
                     self.assertEqual(new_dict[key], self.data[key])
 
-    def test_serialization(self):
-        pass
-
     def test_name(self):
-        pass
+        self.assertEqual(self.video.name, self.data['name'])
 
     def test_id(self):
-        pass
+        self.assertEqual(self.video.id, self.data['id'])
 
     def test_referenceId(self):
-        pass
+        self.assertEqual(self.video.referenceId, self.data['referenceId'])
 
     def test_accountId(self):
-        pass
+        self.assertEqual(self.video.accountId, self.data['accountId'])
 
     def test_shortDescription(self):
-        pass
+        self.assertEqual(self.video.shortDescription,
+            self.data['shortDescription'])
 
     def test_longDescription(self):
-        pass
+        self.assertEqual(self.video.longDescription,
+            self.data['longDescription'])
 
     def test_FLVURL(self):
-        pass
+        self.assertEqual(self.video.FLVURL, self.data['FLVURL'])
 
     def test_videoFullLength(self):
-        pass
+        self.assertEqual(self.video.videoFullLength, [])
 
     def test_creationDate(self):
-        pass
+        self.assertEqual(self.video.creationDate, self.validTestDate)
 
     def test_publishedDate(self):
-        pass
+        self.assertEqual(self.video.publishedDate, self.validTestDate)
 
     def test_lastModifiedDate(self):
-        pass
+        self.assertEqual(self.video.lastModifiedDate, self.validTestDate)
 
     def test_itemState(self):
-        pass
+        self.assertEqual(self.video.itemState, self.data['itemState'])
 
     def test_startDate(self):
-        pass
+        self.assertEqual(self.video.startDate, self.validTestDate)
 
     def test_endDate(self):
-        pass
+        self.assertEqual(self.video.endDate, self.validTestDate)
 
     def test_linkURL(self):
-        pass
+        self.assertEqual(self.video.linkURL, self.data['linkURL'])
 
     def test_linkText(self):
-        pass
+        self.assertEqual(self.video.linkText, self.data['linkText'])
 
     def test_tags(self):
-        pass
+        self.assertEqual(self.video.tags, [])
 
     def test_videoStillURL(self):
-        pass
+        self.assertEqual(self.video.videoStillURL, self.data['videoStillURL'])
 
     def test_thumbnailURL(self):
-        pass
+        self.assertEqual(self.video.thumbnailURL, self.data['thumbnailURL'])
 
     def test_length(self):
-        pass
+        self.assertEqual(self.video.length, self.data['length'])
 
     def test_geoFiltered(self):
-        pass
+        self.assertEqual(self.video.geoFiltered, self.data['geoFiltered'])
 
     def test_geoFilteredExclude(self):
-        pass
+        self.assertEqual(self.video.geoFilteredExclude,
+            self.data['geoFilteredExclude'])
 
     def test_economics(self):
-        pass
+        self.assertEqual(self.video.economics, self.data['economics'])
 
     def test_playsTotal(self):
-        pass
+        self.assertEqual(self.video.playsTotal, self.data['playsTotal'])
 
     def test_playsTrailingWeek(self):
-        pass
+        self.assertEqual(self.video.playsTrailingWeek,
+            self.data['playsTrailingWeek'])
 
     def test_renditions(self):
-        pass
+        self.assertEqual(self.video.renditions, [])
 
     def test_geoFilteredCountries(self):
-        pass
+        self.assertEqual(self.video.geoFilteredExclude,
+            self.data['geoFilteredExclude'])
 
     def test_cuePoints(self):
-        pass
+        self.assertEqual(self.video.cuePoints, [])
