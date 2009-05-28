@@ -473,7 +473,7 @@ class Connection(object):
         return Video(data=self._post(data=data))
 
     def _delete_video(self, video_id, reference_id, cascade, delete_shares):
-        data = {'method', 'delete_video'}
+        data = {'method': 'delete_video'}
         params = {
             'token': self.write_token,
             'cascade': cascade,
