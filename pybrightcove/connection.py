@@ -471,3 +471,61 @@ class Connection(object):
         params["video"] = video.to_dict()
         data['params'] = params
         return Video(data=self._post(data=data))
+
+    def _delete_video(self, video_id, reference_id, cascade, delete_shares):
+        data = {'method', 'delete_video'}
+        params = {
+            'token': self.write_token,
+            'cascade': cascade,
+            'delete_shares': delete_shares}
+        if video_id:
+            params['video_id']
+        elif reference_id:
+            params['reference_id']
+        else:
+            err_msg = 'You must specify either a video_id or a reference_id'
+            raise Exception(err_msg)
+        data['params'] = params
+        self._post(data=data)
+
+    def delete_video_by_id(self, video_id, cascade=True, delete_shares=True):
+        """
+        video_id
+            The id of the video you'd like to delete
+
+        cascade
+            Set this to true if you want to delete this video even if it is
+            part of a manual playlist or assigned to a player. The video will
+            be removed from all playlists and players in which it appears,
+            then deleted.  Defaults to True
+
+        delete_shares
+            Set this to true if you want also to delete shared copies of this
+            video. Note that this will delete all shared copies from sharee
+            accounts, regardless of whether or not those accounts are currently
+            using the video in playlists or players. Defaults to True
+        """
+        self._delete_video(video_id=video_id, reference_id=None,
+            cascade=cascade, delete_shares=delete_shares)
+
+    def delete_video_by_reference_id(self, reference_id, cascade=True,
+        delete_shares=True):
+        """
+        reference_id
+            The publisher-assigned reference id of the video you'd like to
+            delete.
+
+        cascade
+            Set this to true if you want to delete this video even if it is
+            part of a manual playlist or assigned to a player. The video will
+            be removed from all playlists and players in which it appears,
+            then deleted.  Defaults to True
+
+        delete_shares
+            Set this to true if you want also to delete shared copies of this
+            video. Note that this will delete all shared copies from sharee
+            accounts, regardless of whether or not those accounts are currently
+            using the video in playlists or players. Defaults to True
+        """
+        self._delete_video(video_id=None, reference_id=reference_id,
+            cascade=cascade, delete_shares=delete_shares)
