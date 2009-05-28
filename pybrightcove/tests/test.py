@@ -24,8 +24,10 @@ Execute all the unit tests.
 import unittest
 
 from pybrightcove.tests.objects import VideoTest
+from pybrightcove.tests.connection import ConnectionTest
 
 suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(VideoTest))
+suite.addTest(unittest.makeSuite(ConnectionTest))
 
 unittest.TextTestRunner(verbosity=2).run(suite)

@@ -373,8 +373,6 @@ class Video(object):
             full_length_data = data.get('videoFullLength', None)
             if full_length_data:
                 self._videoFullLength = Rendition(full_length_data)
-            else:
-                self._videoFullLength = []
             self._creationDate = _convert_tstamp(
                 data.get('creationDate', None))
             self._publishedDate = _convert_tstamp(
@@ -390,7 +388,7 @@ class Video(object):
             self._videoStillURL = data.get('videoStillURL', None)
             self._thumbnailURL = data.get('thumbnailURL', None)
             self._length = data.get('length', None)
-            self._geoFiltered = data.get('geoFiltered', False)
+            self._geoFiltered = data.get('geoFiltered', None)
             self._geoFilteredExclude = data.get('geoFilteredExclude', True)
             self.economics = data.get('economics', None)
             self._playsTotal = data.get('playsTotal', None)
@@ -407,7 +405,8 @@ class Video(object):
         return self._name
 
     def set_name(self, name):
-        self._name = name[:60]
+        if name:
+            self._name = name[:60]
 
     def get_id(self):
         return self._id
@@ -675,32 +674,24 @@ class Video(object):
             'name': self.name,
             'id': self.id,
             'referenceId': self.referenceId,
-            'accountId': self.accountId,
             'shortDescription': self.shortDescription,
             'longDescription': self.longDescription,
-            'FLVURL': self.FLVURL,
-            'renditions': self.renditions,
-            'videoFullLength': self.videoFullLength,
-            'creationDate': self.creationDate,
-            'publishedDate': self.publishedDate,
-            'lastModifiedDate': self.lastModifiedDate,
-            'startDate': self.startDate,
             'itemState': self.itemState,
-            'endDate': self.endDate,
             'linkURL': self.linkURL,
             'linkText': self.linkText,
             'tags': self.tags,
-            'videoStillURL': self.videoStillURL,
-            'thumbnailURL': self.thumbnailURL,
-            'length': self.length,
             'economics': self.economics,
             'geoFiltered': self.geoFiltered,
             'geoFilteredExclude': self.geoFilteredExclude,
             'geoFilteredCountries': self.geoFilteredCountries,
-            'cuePoints': self.cuePoints,
-            'playsTotal': self.playsTotal,
-            'playsTrailingWeek': self.playsTrailingWeek}
+            'cuePoints': self.cuePoints}
+
+        data['renditions'] = []
+        for r in self.renditions:
+            data['renditions'].append(r.to_dict())
+        if self.videoFullLength:
+            data['videoFullLength'] = self.videoFullLength.to_dict()
         for key in data.keys():
-            if data[key] == None:
+            if data[key] in (None, []):
                 data.pop(key)
         return data

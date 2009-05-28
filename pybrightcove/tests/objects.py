@@ -103,7 +103,7 @@ class VideoTest(unittest.TestCase):
         self.assertEqual(self.video.FLVURL, self.data['FLVURL'])
 
     def test_videoFullLength(self):
-        self.assertEqual(self.video.videoFullLength, [])
+        self.assertEqual(self.video.videoFullLength, None)
 
     def test_creationDate(self):
         self.assertEqual(self.video.creationDate, self.validTestDate)

@@ -21,6 +21,7 @@
 import hashlib
 import simplejson
 import urllib2
+import urllib
 import cookielib
 from pybrightcove       import config, UserAgent, ItemCollection
 from pybrightcove.video import Video
@@ -52,15 +53,24 @@ class Connection(object):
         elif config.has_option('Connection', 'write_url'):
             self.write_url = config.get('Connection', 'write_url')
 
-    def _post_file(self, data, file_to_upload):
-        from pybrightcove.multipart import MultipartPostHandler
-        cookies = cookielib.CookieJar()
-        cookie_processor = urllib2.HTTPCookieProcessor(cookies)
-        opener = urllib2.build_opener(cookie_processor, MultipartPostHandler)
+    def _post(self, data, file_to_upload=None):
         params = {"JSONRPC": simplejson.dumps(data)}
-        params["filePath"] = open(file_to_upload, "rb")
-        r = opener.open(self.write_url, params)
-        return simplejson.loads(r.read())
+        if file_to_upload:
+            from pybrightcove.multipart import MultipartPostHandler
+            cookies = cookielib.CookieJar()
+            cproc = urllib2.HTTPCookieProcessor(cookies)
+            opener = urllib2.build_opener(cproc, MultipartPostHandler)
+            params["filePath"] = open(file_to_upload, "rb")
+            r = opener.open(self.write_url, params)
+            return simplejson.loads(r.read())
+        else:
+            msg = urllib.urlencode({'json': params['JSONRPC']})
+            req = urllib2.urlopen(self.write_url, msg)
+            resp = req.read()
+            result = simplejson.loads(resp)
+            if 'error' in result and result['error']:
+                BrightcoveError.raise_exception(data)
+            return result['result']
 
     def _get_response(self, **kwargs):
         url = self.read_url + "?output=JSON&token=%s" % self.read_token
@@ -448,5 +458,16 @@ class Connection(object):
             m.update(open(filename, 'rb').read())
             data['params']['file_checksum'] = m.hexdigest()
 
-        r = self._post_file(data=data, file_to_upload=filename)
+        r = self._post(data=data, file_to_upload=filename)
         return r
+
+    def update_video(self, video):
+        """
+        video:
+            The metadata for the video you'd like to update.
+        """
+        data = {"method": "update_video"}
+        params = {"token": self.write_token}
+        params["video"] = video.to_dict()
+        data['params'] = params
+        return Video(data=self._post(data=data))
