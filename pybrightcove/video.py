@@ -370,8 +370,11 @@ class Video(object):
             self.shortDescription = data.get('shortDescription', None)
             self.longDescription = data.get('longDescription', None)
             self._FLVURL = data.get('FLVURL', None)
-            self._videoFullLength = Rendition(
-                data.get('videoFullLength', None))
+            full_length_data = data.get('videoFullLength', None)
+            if full_length_data:
+                self._videoFullLength = Rendition(full_length_data)
+            else:
+                self._videoFullLength = []
             self._creationDate = _convert_tstamp(
                 data.get('creationDate', None))
             self._publishedDate = _convert_tstamp(
