@@ -24,49 +24,66 @@ from pybrightcove.exceptions import PyBrightcoveError
 from pybrightcove.config import Config
 from pybrightcove.video import Video
 from pybrightcove.playlist import Playlist
+from pybrightcove.enums import SortByType, SortByOrderType
 
 Version = '0.1'
 UserAgent = 'PyBrightcove/%s (%s)' % (Version, sys.platform)
 config = Config()
 
 
+def item_lister(comand, connection, page_size, page_number, sort_by,
+    sort_order, **kwargs):
+    """
+    A generator function for listing Video and Playlist objects.
+    """
+    page = page_number
+    while True:
+        itemCollection = connection.get_list_command(command,
+                                                page_size=page_size,
+                                                page_number=page,
+                                                sort_by=sort_by,
+                                                sort_order=sort_order,
+                                                **kwargs)
+        for item in itemCollection.items:
+            yield item
+        if item:
+            page += 1
+        else:
+            break
+
+
+class ItemResultSet(object):
+
+    def __init__(self, command, connection, page_size=100, page_number=0,
+            sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
+            **kwargs):
+        self.command = command
+        self.connection = connection
+        self.page_size = page_size
+        self.page_number = page_number
+        self.sort_by = sort_by
+        self.sort_order = sort_order
+        self.kwargs = kwargs
+
+    def __iter__(self):
+        return item_lister(self.command, self.connection, self.page_size,
+            self.page_number, self.sort_by, self.sort_order, **self.kwargs)
+
+
 class ItemCollection(object):
 
-    def __init__(self, data=None, collection_type=None):
-        self._total_count = None
-        self._items = None
-        self._page_number = None
-        self._page_size = None
+    def __init__(self, data, collection_type):
+        self.total_count = None
+        self.items = None
+        self.page_number = None
+        self.page_size = None
+        self.items = []
 
-        if data and collection_type:
-            self._total_count = data['total_count']
-            self._page_number = data['page_number']
-            self._page_size = data['page_size']
-            for item in data['items']:
-                if collection_type == 'Video':
-                    self.items.append(Video(data=item))
-                elif collection_type == 'Playlist':
-                    self.items.append(Playlist(data=item))
-
-    def get_total_count(self):
-        return self._total_count
-
-    def get_page_number(self):
-        return self._page_number
-
-    def get_page_size(self):
-        return self._page_size
-
-    def get_items(self):
-        if not self._items:
-            self._items = []
-        return self._items
-
-    total_count = property(get_total_count,
-        doc="The total number of videos in the collection.")
-    page_number = property(get_page_number,
-        doc="Which page of the results this ItemCollection represents.")
-    page_size = property(get_page_size,
-        doc="How many items a page consists of.")
-    items = property(get_items,
-        doc="The actual items that this collection contains.")
+        self.total_count = int(data['total_count'])
+        self.page_number = int(data['page_number'])
+        self.page_size = int(data['page_size'])
+        for item in data['items']:
+            if collection_type == 'Video':
+                self.items.append(Video(data=item))
+            elif collection_type == 'Playlist':
+                self.items.append(Playlist(data=item))

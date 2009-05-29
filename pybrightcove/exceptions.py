@@ -20,7 +20,7 @@
 
 
 class PyBrightcoveError(Exception):
-    
+
     def __init__(self, reason):
         super(PyBrightcoveError, self).__init__(reason)
 

@@ -337,12 +337,12 @@ class Video(object):
         when the Video is created.
 
     reference_id
-        A user-specified id that uniquely identifies this Video.  The 
+        A user-specified id that uniquely identifies this Video.  The
         reference_id can be used as a foreign-key to identify this video in
         another system.
 
     name
-        The title of this Video. The name is a required property when you 
+        The title of this Video. The name is a required property when you
         create a video.
 
     account_id
@@ -437,25 +437,13 @@ class Video(object):
     """
 
     def __init__(self, filename=None, name=None, short_description=None,
-        id=None, reference_id=None):
+        id=None, reference_id=None, data=None):
 
         self._filename = None
         self.name = None
         self.short_description = None
         self.id = None
         self.reference_id = None
-
-        if filename and name and short_description:
-            self._filename = filename
-            self.name = name
-            self.short_description = short_description
-        elif id or reference_id:
-            self.id = id
-            self.reference_id = reference_id
-            self._find_video()
-        else:
-            raise PyBrightcoveError('Invalid parameters for Video.')
-
         self.accountId = None
         self.long_description = None
         self.flv_url = None
@@ -480,6 +468,40 @@ class Video(object):
         self.cue_points = None
         self.plays_total = None
         self.plays_trailing_week = None
+
+        if filename and name and short_description:
+            self._filename = filename
+            self.name = name
+            self.short_description = short_description
+        elif id or reference_id:
+            self.id = id
+            self.reference_id = reference_id
+            self._find_video()
+        elif data:
+            self._load(data)
+        else:
+            raise PyBrightcoveError('Invalid parameters for Video.')
+
+    def _load(data):
+        self.creation_date = _convert_tstamp(data['creationDate'])
+        self.economics = data['economics']
+        self.id = data['id']
+        self.last_modified_date = _convert_tstamp(data['lastModifiedDate'])
+        self.length = data['length']
+        self.link_text = data['linkText']
+        self.link_url = data['linkURL']
+        self.long_description = data['longDescription']
+        self.name = data['name']
+        self.plays_total = data['playsTotal']
+        self.plays_trailing_week = data['playsTrailingWeek']
+        self.published_date = _convert_tstamp(data['publishedDate'])
+        self.reference_id = data['referenceId']
+        self.short_description = data['shortDescription']
+        self.tags = []
+        for tag in data['tags']:
+            self.tags.append(tag)
+        self.thumbnail_url = data['thumbnailURL']
+        self.video_still_url = data['videoStillURL']
 
     def __setattr__(self, name, value):
         msg = None
@@ -508,7 +530,7 @@ class Video(object):
                                   EconomicsEnum.AD_SUPPORTED):
                 msg = "Video.economics must be either EconomicsEnum.FREE or "
                 msg += "EconomicsEnum.AD_SUPPORTED"
-            
+
             if msg:
                 raise PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
@@ -530,7 +552,7 @@ class Video(object):
     def add_image(self, reference_id, display_name, image_type, filename=None,
             remote_url=None):
         raise PyBrightcoveError("Not yet implemented")
-    
+
     def update_image(self, reference_id, filename=None, remote_url=None):
         raise PyBrightcoveError("Not yet implemented")
 
@@ -539,12 +561,17 @@ class Video(object):
 
     @staticmethod
     def find_by_tags(and_tags=None, or_tags=None):
+        err = None
         if not and_tags and not or_tags:
-            raise PyBrightcoveError("You must supply at least one of either and_tags or or_tags.")
+            err = "You must supply at least one of either and_tags or or_tags."
         if and_tags and not isinstance(and_tags, (tuple, list)):
-            raise PyBrightcoveError("The and_tags argument for Video.find_by_tags must an iterable")
+            err = "The and_tags argument for Video.find_by_tags must an "
+            err += "iterable"
         if or_tags and not isinstance(or_tags, (tuple, list)):
-            raise PyBrightcoveError("The or_tags argument for Video.find_by_tags must an iterable")
+            err = "The or_tags argument for Video.find_by_tags must an "
+            err += "iterable"
+        if err:
+            raise PyBrightcoveError(err)
         raise PyBrightcoveError("Not yet implemented")
 
     @staticmethod
@@ -562,11 +589,13 @@ class Video(object):
     @staticmethod
     def find_by_reference_ids(reference_ids):
         if not isinstance(reference_ids, (list, tuple)):
-            raise PyBrightcoveError("Video.find_by_reference_ids expects an iterable argument")
+            err = "Video.find_by_reference_ids expects an iterable argument"
+            raise PyBrightcoveError(err)
         raise PyBrightcoveError("Not yet implemented")
 
     @staticmethod
     def find_by_ids(ids):
         if not isinstance(ids, (list, tuple)):
-            raise PyBrightcoveError("Video.find_by_ids expects an iterable argument")
+            err = "Video.find_by_ids expects an iterable argument"
+            raise PyBrightcoveError(err)
         raise PyBrightcoveError("Not yet implemented")

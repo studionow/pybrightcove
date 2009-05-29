@@ -144,8 +144,9 @@ class VideoTest(unittest.TestCase):
                           filename="somefile.mov")
             video.economics = "The Keynesian view is Wrong"
         except PyBrightcoveError, e:
-            self.assertEqual(e.message,
-                "Video.economics must be either EconomicsEnum.FREE or EconomicsEnum.AD_SUPPORTED")
+            err = "Video.economics must be either EconomicsEnum.FREE or"
+            err += " EconomicsEnum.AD_SUPPORTED"
+            self.assertEqual(e.message, err)
         else:
             self.fail("Expected PyBrightcoveError.")
 
@@ -156,8 +157,9 @@ class VideoTest(unittest.TestCase):
                           filename="somefile.mov")
             video.item_state = "Invalid"
         except PyBrightcoveError, e:
-            self.assertEqual(e.message,
-                "Video.item_state must be either ItemStateEnum.ACTIVE or ItemStateEnum.INACTIVE")
+            err = "Video.item_state must be either ItemStateEnum.ACTIVE or "
+            err += "or ItemStateEnum.INACTIVE"
+            self.assertEqual(e.message, err)
         else:
             self.fail("Expected PyBrightcoveError.")
 
@@ -172,4 +174,3 @@ class VideoTest(unittest.TestCase):
                 "Video.video_full_length must be of type Rendition")
         else:
             self.fail("Expected PyBrightcoveError.")
-

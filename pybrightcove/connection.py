@@ -83,6 +83,25 @@ class Connection(object):
         req = urllib2.urlopen(url)
         return simplejson.loads(req.read())
 
+    def get_list_command(self, command, page_size, page_number, sort_by,
+        sort_order, **kwargs):
+        data = self._get_response(command=command,
+                                  page_size=page_size,
+                                  page_number=page_number,
+                                  sort_by=sort_by
+                                  sort_order=sort_order,
+                                  video_fields=None,
+                                  get_item_count="true",
+                                  **kwargs)
+        if 'error' in data:
+            BrightcoveError.raise_exception(data)
+        collection_type = None
+        if 'video' in command:
+            collection_type = 'Video'
+        elif 'playlist' in command:
+            collection_type = 'Playlist'
+        return ItemCollection(data=data, collection_type=collection_type)
+
     def _base_get_command(self, command, page_size=100, page_number=0,
             sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC,
             video_fields=None, get_item_count=True, single=False, **kwargs):
