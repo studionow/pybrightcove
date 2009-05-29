@@ -19,6 +19,8 @@
 # THE SOFTWARE.
 
 import sys
+
+from pybrightcove.exceptions import PyBrightcoveError
 from pybrightcove.config import Config
 from pybrightcove.video import Video
 from pybrightcove.playlist import Playlist

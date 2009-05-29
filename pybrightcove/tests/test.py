@@ -23,11 +23,11 @@ Execute all the unit tests.
 
 import unittest
 
-from pybrightcove.tests.objects import VideoTest
-from pybrightcove.tests.connection import ConnectionTest
+from pybrightcove.tests.video import VideoTest
+from pybrightcove.tests.playlist import PlaylistTest
 
 suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(VideoTest))
-suite.addTest(unittest.makeSuite(ConnectionTest))
+suite.addTest(unittest.makeSuite(PlaylistTest))
 
 unittest.TextTestRunner(verbosity=2).run(suite)

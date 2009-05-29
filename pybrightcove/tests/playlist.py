@@ -18,4 +18,48 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-### TODO: Put mock objects here
+"""
+Test the Playlist object
+"""
+
+import unittest
+from pybrightcove import Playlist
+
+
+class PlaylistTest(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_instantiate_new(self):
+        self.fail()
+
+    def test_instantiate_with_playlist_id(self):
+        self.fail()
+
+    def test_instantiate_with_reference_id(self):
+        self.fail()
+
+    def test_instantiate_with_invalid_parameters(self):
+        self.fail()
+
+    def test_save_new(self):
+        self.fail()
+
+    def test_save_update(self):
+        self.fail()
+
+    def test_delete(self):
+        self.fail()
+
+    def test_find_by_ids(self):
+        self.fail()
+
+    def test_find_by_reference_ids(self):
+        self.fail()
+
+    def test_find_by_player_id(self):
+        self.fail()
+
+    def test_find_all(self):
+        self.fail()
