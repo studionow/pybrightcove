@@ -20,7 +20,9 @@
 
 from datetime import datetime
 from pybrightcove import PyBrightcoveError
-from pybrightcove.enums import EconomicsEnum, ItemStateEnum, VideoCodecEnum
+from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
+from pybrightcove import VideoCodecEnum, ItemStateEnum
+from pybrightcove import ItemResultSet
 
 
 def _convert_tstamp(val):
@@ -482,7 +484,7 @@ class Video(object):
         else:
             raise PyBrightcoveError('Invalid parameters for Video.')
 
-    def _load(data):
+    def _load(self, data):
         self.creation_date = _convert_tstamp(data['creationDate'])
         self.economics = data['economics']
         self.id = data['id']
@@ -558,6 +560,12 @@ class Video(object):
 
     def find_releated(self):
         raise PyBrightcoveError("Not yet implemented")
+
+    @staticmethod
+    def find_all(connection=None, page_size=100, page_number=0,
+        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        return ItemResultSet('find_all_videos', Video, connection, page_size,
+            page_number, sort_by, sort_order)
 
     @staticmethod
     def find_by_tags(and_tags=None, or_tags=None):

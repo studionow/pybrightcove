@@ -23,8 +23,8 @@ Test the Video object.
 """
 
 import unittest
-from pybrightcove import Video, PyBrightcoveError
-
+from pybrightcove import PyBrightcoveError
+from pybrightcove import Video
 
 class VideoTest(unittest.TestCase):
 
@@ -86,7 +86,12 @@ class VideoTest(unittest.TestCase):
         self.fail()
 
     def test_find_all(self):
-        self.fail()
+        videos = Video.find_all()
+        for video in videos:
+            self.assertEquals(type(video), Video)
+        self.assertEquals(video.id not in (0, None), True)
+        if not video:
+            self.fail("Did not find any videos.")
 
     def test_find_related(self):
         self.fail()

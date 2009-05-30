@@ -18,8 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pybrightcove.enums import PlaylistTypeEnum
-from pybrightcove.video import Video
+from pybrightcove import PlaylistTypeEnum
+from pybrightcove import Video
 
 
 class Playlist(object):
