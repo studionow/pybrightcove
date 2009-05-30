@@ -82,8 +82,8 @@ class Connection(object):
         req = urllib2.urlopen(url)
         return simplejson.loads(req.read())
 
-    def get_list_command(self, command, item_class, page_size, page_number,
-        sort_by, sort_order, **kwargs):
+    def get_list(self, command, item_class, page_size, page_number, sort_by,
+        sort_order, **kwargs):
         """
         Not intended to be called directly, but rather through an by the
         ItemResultSet object iterator.
@@ -100,6 +100,12 @@ class Connection(object):
             BrightcoveError.raise_exception(data)
         return ItemCollection(data=data, item_class=item_class)
 
+    def get_item(self, command, **kwargs):
+        data = self._get_response(command=command, **kwargs)
+        if 'error' in data:
+            BrightcoveError.raise_exception(data)
+        return data
+
 
 def item_lister(command, connection, page_size, page_number, sort_by,
     sort_order, item_class, **kwargs):
@@ -108,13 +114,13 @@ def item_lister(command, connection, page_size, page_number, sort_by,
     """
     page = page_number
     while True:
-        itemCollection = connection.get_list_command(command,
-                                                page_size=page_size,
-                                                page_number=page,
-                                                sort_by=sort_by,
-                                                sort_order=sort_order,
-                                                item_class=item_class,
-                                                **kwargs)
+        itemCollection = connection.get_list(command,
+                                             page_size=page_size,
+                                             page_number=page,
+                                             sort_by=sort_by,
+                                             sort_order=sort_order,
+                                             item_class=item_class,
+                                             **kwargs)
         for item in itemCollection.items:
             yield item
         if len(itemCollection.items) > 0:

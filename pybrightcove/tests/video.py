@@ -26,6 +26,12 @@ import unittest
 from pybrightcove import PyBrightcoveError
 from pybrightcove import Video
 
+## NOTE: This are ids private to my account, if you want to run these tests
+##       for yourself and have them pass, replace these with your own values.
+TEST_VIDEO_ID = 11449913001
+TEST_VIDEO_REF_ID = 'SN-47314834-100808-ATLGA-SV-404693da06d38.mp4'
+
+
 class VideoTest(unittest.TestCase):
 
     def setUp(self):
@@ -35,10 +41,12 @@ class VideoTest(unittest.TestCase):
         self.fail()
 
     def test_instantiate_with_video_id(self):
-        self.fail()
+        video = Video(id=TEST_VIDEO_ID)
+        self.assertEquals(video.reference_id, TEST_VIDEO_REF_ID)
 
     def test_instantiate_with_reference_id(self):
-        self.fail()
+        video = Video(reference_id=TEST_VIDEO_REF_ID)
+        self.assertEquals(video.id, TEST_VIDEO_ID)
 
     def test_instantiate_with_invalid_parameters(self):
         self.fail()

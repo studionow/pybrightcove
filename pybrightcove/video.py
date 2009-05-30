@@ -22,7 +22,7 @@ from datetime import datetime
 from pybrightcove import PyBrightcoveError
 from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
 from pybrightcove import VideoCodecEnum, ItemStateEnum
-from pybrightcove import ItemResultSet
+from pybrightcove import Connection, ItemResultSet
 
 
 def _convert_tstamp(val):
@@ -439,7 +439,7 @@ class Video(object):
     """
 
     def __init__(self, filename=None, name=None, short_description=None,
-        id=None, reference_id=None, data=None):
+        id=None, reference_id=None, data=None, connection=None):
 
         self._filename = None
         self.name = None
@@ -471,6 +471,10 @@ class Video(object):
         self.plays_total = None
         self.plays_trailing_week = None
 
+        self.connection = connection
+        if not self.connection:
+            self.connection = Connection()
+
         if filename and name and short_description:
             self._filename = filename
             self.name = name
@@ -483,6 +487,18 @@ class Video(object):
             self._load(data)
         else:
             raise PyBrightcoveError('Invalid parameters for Video.')
+
+    def _find_video(self):
+        data = None
+        if self.id:
+            data = self.connection.get_item(
+                'find_video_by_id', video_id=self.id)
+        elif self.reference_id:
+            data = self.connection.get_item(
+                'find_video_by_reference_id', reference_id=self.reference_id)
+
+        if data:
+            self._load(data)
 
     def _load(self, data):
         self.creation_date = _convert_tstamp(data['creationDate'])
