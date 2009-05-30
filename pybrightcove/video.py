@@ -449,7 +449,7 @@ class Video(object):
         self.accountId = None
         self.long_description = None
         self.flv_url = None
-        self.renditions = None
+        self.renditions = []
         self.video_full_length = None
         self.creation_date = None
         self.published_date = None
@@ -459,7 +459,7 @@ class Video(object):
         self.end_date = None
         self.link_url = None
         self.link_text = None
-        self.tags = None
+        self.tags = []
         self.video_still_url = None
         self.thumbnail_url = None
         self.length = None
@@ -499,6 +499,29 @@ class Video(object):
 
         if data:
             self._load(data)
+
+    def _to_dict(self):
+        data = {
+            'name': self.name,
+            'referenceId': self.reference_id,
+            'shortDescription': self.short_description,
+            'longDescription': self.long_description,
+            'itemState': self.item_state,
+            'linkURL': self.link_url,
+            'linkText': self.link_text,
+            'tags': self.tags,
+            'economics': self.economics,
+
+            # TODO: Don't support the saving/updating of these values yet.
+            #'geoFiltered': self.geo_filtered,
+            #'geoFilteredCountries': self.geo_filtered_countries,
+            #'geoFilteredExclude': self.geo_filtered_exclude,
+            #'cuePoints': self.cue_points,
+            #'renditions': self.renditions,
+            #'videoFullLength': self.video_full_length
+        }
+        [data.pop(key) for key in data.keys() if data[key] == None]
+        return data
 
     def _load(self, data):
         self.creation_date = _convert_tstamp(data['creationDate'])
@@ -554,7 +577,18 @@ class Video(object):
         return super(Video, self).__setattr__(name, value)
 
     def save(self):
-        raise PyBrightcoveError("Not yet implemented")
+        """
+        Creates or updates the video
+        """
+        if not self.id:
+            self.id = self.connection.post('create_video', self._filename,
+                create_multiple_renditions=True,
+                preserve_source_rendition=True,
+                video=self._to_dict())
+        else:
+            data = self.connection.post('update_video', video=self._to_dict())
+            if data:
+                self._load(data)
 
     def delete(self):
         raise PyBrightcoveError("Not yet implemented")

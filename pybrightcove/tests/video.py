@@ -23,6 +23,7 @@ Test the Video object.
 """
 
 import unittest
+import uuid
 from pybrightcove import PyBrightcoveError
 from pybrightcove import Video
 
@@ -32,13 +33,22 @@ TEST_VIDEO_ID = 11449913001
 TEST_VIDEO_REF_ID = 'SN-47314834-100808-ATLGA-SV-404693da06d38.mp4'
 
 
+## TODO: Figure out a good way to mock the Connection object
+
+
 class VideoTest(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.test_uuid = str(uuid.uuid4())
 
     def test_instantiate_new(self):
-        self.fail()
+        video = Video(filename='/mnt/local/movie.mov', name='My Movie',
+            short_description='This is my movie.')
+        self.assertEquals(video.id, None)
+        self.assertEquals(video.name, 'My Movie')
+        self.assertEquals(video.short_description, 'This is my movie.')
+        self.assertEquals(video.long_description, None)
+        self.assertEquals(len(video.tags), 0)
 
     def test_instantiate_with_video_id(self):
         video = Video(id=TEST_VIDEO_ID)
@@ -49,16 +59,31 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(video.id, TEST_VIDEO_ID)
 
     def test_instantiate_with_invalid_parameters(self):
-        self.fail()
+        try:
+            video = Video(name='This is wrong.')
+            self.fail('Should not have worked, but rather raised an error.')
+            video = Video()
+            self.fail('Should not have worked, but rather raised an error.')
+        except PyBrightcoveError, e:
+            self.assertEquals(e.message, 'Invalid parameters for Video.')
+        except Exception, e:
+            self.fail('Should have thrown a PyBrightcoveError exception.')
 
     def test_save_new(self):
-        self.fail()
+        video = Video(filename='bears.mov', name='The Bears',
+            short_description='Opening roll for an exciting soccer match.')
+        video.tags.append('unittest')
+        video.save()
+        self.assertEquals(video.id not in (0, '', None), True)
 
     def test_save_update(self):
-        self.fail()
-
-    def test_save_update_add_additional_tags(self):
-        self.fail()
+        video = Video(id=TEST_VIDEO_ID)
+        video.tags.append('tag-%s' % self.test_uuid)
+        video.tags.append('unittest')
+        lmd = video.last_modified_date
+        video.save()
+        self.assertEquals(video.reference_id, TEST_VIDEO_REF_ID)
+        self.assertNotEquals(video.last_modified_date, lmd)
 
     def test_get_upload_status(self):
         self.fail()

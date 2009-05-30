@@ -55,20 +55,21 @@ class Connection(object):
 
     def _post(self, data, file_to_upload=None):
         params = {"JSONRPC": simplejson.dumps(data)}
+        req = None
         if file_to_upload:
             cookies = cookielib.CookieJar()
             cproc = urllib2.HTTPCookieProcessor(cookies)
             opener = urllib2.build_opener(cproc, MultipartPostHandler)
             params["filePath"] = open(file_to_upload, "rb")
-            r = opener.open(self.write_url, params)
-            return simplejson.loads(r.read())
+            req = opener.open(self.write_url, params)
         else:
             msg = urllib.urlencode({'json': params['JSONRPC']})
             req = urllib2.urlopen(self.write_url, msg)
-            resp = req.read()
-            result = simplejson.loads(resp)
+
+        if req:
+            result = simplejson.loads(req.read())
             if 'error' in result and result['error']:
-                BrightcoveError.raise_exception(data)
+                BrightcoveError.raise_exception(result['error'])
             return result['result']
 
     def _get_response(self, **kwargs):
@@ -80,7 +81,29 @@ class Connection(object):
                     val = ",".join(val)
                 url += "&%s=%s" % (key, val)
         req = urllib2.urlopen(url)
-        return simplejson.loads(req.read())
+        data = simplejson.loads(req.read())
+        if 'error' in data and data['error']:
+            BrightcoveError.raise_exception(data['error'])
+        return data
+
+    def post(self, command, file_to_upload=None, **kwargs):
+        data = {"method": command}
+        params = {"token": self.write_token}
+        for key in kwargs:
+            if key and kwargs[key]:
+                params[key] = kwargs[key]
+        if file_to_upload:
+            m = hashlib.md5()
+            fp = open(file_to_upload, 'rb')
+            bits = fp.read(262144)  ## 256KB
+            while bits:
+                m.update(bits)
+                bits = fp.read(262144)
+            fp.close()
+            params['file_checksum'] = m.hexdigest()
+        data['params'] = params
+
+        return self._post(data=data, file_to_upload=file_to_upload)
 
     def get_list(self, command, item_class, page_size, page_number, sort_by,
         sort_order, **kwargs):
@@ -96,14 +119,10 @@ class Connection(object):
                                   video_fields=None,
                                   get_item_count="true",
                                   **kwargs)
-        if 'error' in data:
-            BrightcoveError.raise_exception(data)
         return ItemCollection(data=data, item_class=item_class)
 
     def get_item(self, command, **kwargs):
         data = self._get_response(command=command, **kwargs)
-        if 'error' in data:
-            BrightcoveError.raise_exception(data)
         return data
 
 
