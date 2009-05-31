@@ -141,6 +141,9 @@ def item_lister(command, connection, page_size, page_number, sort_by,
                                              **kwargs)
         for item in itemCollection.items:
             yield item
+        if itemCollection.total_count < 0 or itemCollection.page_size == 0:
+            break  ## TODO: This doesn't seem right but is what happens when
+                   ##       fetching a list less than a single page
         if len(itemCollection.items) > 0:
             page += 1
         else:

@@ -31,8 +31,9 @@ from pybrightcove import UploadStatusEnum, ImageTypeEnum
 ## NOTE: This are ids private to my account, if you want to run these tests
 ##       for yourself and have them pass, replace these with your own values.
 TEST_VIDEO_ID = 11449913001
+TEST_VIDEO_IDS = [TEST_VIDEO_ID, 24780403001, 24780402001]
 TEST_VIDEO_REF_ID = 'SN-47314834-100808-ATLGA-SV-404693da06d38.mp4'
-
+TEST_VIDEO_REF_IDS = ['unittest-1', 'unittest-2', TEST_VIDEO_REF_ID]
 
 ## TODO: Figure out a good way to mock the Connection object
 
@@ -116,22 +117,35 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(video.image.id > 0, True)
 
     def test_find_by_tags(self):
-        self.fail()
+        videos = Video.find_by_tags(and_tags=['unittest', ])
+        for video in videos:
+            self.assertEquals(type(video), Video)
+            self.assertEquals('unittest' in video.tags, True)
 
     def test_find_by_text(self):
-        self.fail()
+        videos = Video.find_by_text('bear')
+        for video in videos:
+            self.assertEquals(type(video), Video)
 
     def test_find_by_campaign(self):
-        self.fail()
+        videos = Video.find_by_campaign(988756758)
+        for video in videos:
+            self.assertEquals(type(video), Video)
 
     def test_find_by_user(self):
-        self.fail()
+        videos = Video.find_by_user(12312431)
+        for video in videos:
+            self.assertEquals(type(video), Video)
 
     def test_find_by_reference_ids(self):
-        self.fail()
+        videos = Video.find_by_reference_ids(TEST_VIDEO_REF_IDS)
+        for video in videos:
+            self.assertEquals(video.reference_id in TEST_VIDEO_REF_IDS, True)
 
     def test_find_by_ids(self):
-        self.fail()
+        videos = Video.find_by_ids(TEST_VIDEO_IDS)
+        for video in videos:
+            self.assertEquals(video.id in TEST_VIDEO_IDS, True)
 
     def test_find_all(self):
         videos = Video.find_all()
@@ -211,7 +225,7 @@ class VideoTest(unittest.TestCase):
             video.item_state = "Invalid"
         except PyBrightcoveError, e:
             err = "Video.item_state must be either ItemStateEnum.ACTIVE or "
-            err += "or ItemStateEnum.INACTIVE"
+            err += "ItemStateEnum.INACTIVE"
             self.assertEqual(e.message, err)
         else:
             self.fail("Expected PyBrightcoveError.")

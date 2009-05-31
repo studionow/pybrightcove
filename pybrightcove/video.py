@@ -581,7 +581,9 @@ class Video(object):
             page_number, sort_by, sort_order)
 
     @staticmethod
-    def find_by_tags(and_tags=None, or_tags=None):
+    def find_by_tags(and_tags=None, or_tags=None, connection=None,
+        page_size=100, page_number=0, sort_by=SortByType.MODIFIED_DATE,
+        sort_order=SortByOrderType.ASC):
         err = None
         if not and_tags and not or_tags:
             err = "You must supply at least one of either and_tags or or_tags."
@@ -593,30 +595,53 @@ class Video(object):
             err += "iterable"
         if err:
             raise PyBrightcoveError(err)
-        raise PyBrightcoveError("Not yet implemented")
+        atags = None
+        otags = None
+        if and_tags:
+            atags = ','.join([str(t) for t in and_tags])
+        if or_tags:
+            otags = ','.join([str(t) for t in or_tags])
+        return ItemResultSet('find_videos_by_tags', Video, connection,
+            page_size, page_number, sort_by, sort_order, and_tags=atags,
+            or_tags=otags)
 
     @staticmethod
-    def find_by_text(text):
-        raise PyBrightcoveError("Not yet implemented")
+    def find_by_text(text, connection=None, page_size=100, page_number=0,
+        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        return ItemResultSet('find_videos_by_text', Video, connection,
+            page_size, page_number, sort_by, sort_order, text=text)
 
     @staticmethod
-    def find_by_campaign(campaign_id):
-        raise PyBrightcoveError("Not yet implemented")
+    def find_by_campaign(campaign_id, connection=None, page_size=100,
+        page_number=0, sort_by=SortByType.CREATION_DATE,
+        sort_order=SortByOrderType.ASC):
+        return ItemResultSet('find_videos_by_campaign_id', Video, connection,
+            page_size, page_number, sort_by, sort_order,
+            campaign_id=campaign_id)
 
     @staticmethod
-    def find_by_user(user_id):
-        raise PyBrightcoveError("Not yet implemented")
+    def find_by_user(user_id, connection=None, page_size=100, page_number=0,
+        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        return ItemResultSet('find_videos_by_user_id', Video, connection,
+            page_size, page_number, sort_by, sort_order, user_id=user_id)
 
     @staticmethod
-    def find_by_reference_ids(reference_ids):
+    def find_by_reference_ids(reference_ids, connection=None, page_size=100,
+        page_number=0, sort_by=SortByType.CREATION_DATE,
+        sort_order=SortByOrderType.ASC):
         if not isinstance(reference_ids, (list, tuple)):
             err = "Video.find_by_reference_ids expects an iterable argument"
             raise PyBrightcoveError(err)
-        raise PyBrightcoveError("Not yet implemented")
+        ids = ','.join(reference_ids)
+        return ItemResultSet('find_videos_by_reference_ids', Video, connection,
+            page_size, page_number, sort_by, sort_order, reference_ids=ids)
 
     @staticmethod
-    def find_by_ids(ids):
+    def find_by_ids(ids, connection=None, page_size=100, page_number=0,
+        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
         if not isinstance(ids, (list, tuple)):
             err = "Video.find_by_ids expects an iterable argument"
             raise PyBrightcoveError(err)
-        raise PyBrightcoveError("Not yet implemented")
+        ids = ','.join([str(i) for i in ids])
+        return ItemResultSet('find_videos_by_ids', Video, connection,
+            page_size, page_number, sort_by, sort_order, video_ids=ids)
