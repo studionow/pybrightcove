@@ -115,6 +115,13 @@ class PlaylistTypeEnum(object):
     PLAYS_TRAILING_WEEK = "PLAYS_TRAILING_WEEK"
 
 
+class FilterChoicesEnum(object):
+    PLAYABLE = "PLAYABLE"
+    UNSCHEDULED = 'UNSCHEDULED'
+    INACTIVE = 'INACTIVE'
+    DELETED = 'DELETED'
+
+
 class VideoCodecEnum(object):
     UNDEFINED = "UNDEFINED"
     NONE = "NONE"

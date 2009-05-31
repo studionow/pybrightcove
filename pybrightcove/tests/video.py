@@ -24,9 +24,10 @@ Test the Video object.
 
 import unittest
 import uuid
+from datetime import datetime, timedelta
 from pybrightcove import PyBrightcoveError
 from pybrightcove import Video, Image
-from pybrightcove import UploadStatusEnum, ImageTypeEnum
+from pybrightcove import UploadStatusEnum, ImageTypeEnum, FilterChoicesEnum
 
 ## NOTE: This are ids private to my account, if you want to run these tests
 ##       for yourself and have them pass, replace these with your own values.
@@ -156,7 +157,25 @@ class VideoTest(unittest.TestCase):
             self.fail("Did not find any videos.")
 
     def test_find_related(self):
-        self.fail()
+        video = Video(id=TEST_VIDEO_IDS[1])
+        for related_video in video.find_related():
+            self.assertEquals(type(related_video), Video)
+        self.assertEquals(related_video.id > 0, True)
+
+    def test_find_modified_unfiltered(self):
+        yesterday = datetime.now() - timedelta(days=1)
+        videos = Video.find_modified(since=yesterday)
+        for video in videos:
+            self.assertEquals(type(video), Video)
+        self.assertEquals(video.id > 0, True)
+
+    def test_find_modified_filtered(self):
+        yesterday = datetime.now() - timedelta(days=1)
+        filters = [FilterChoicesEnum.PLAYABLE, FilterChoicesEnum.DELETED]
+        videos = Video.find_modified(since=yesterday, filter_list=filters)
+        for video in videos:
+            self.assertEquals(type(video), Video)
+        self.assertEquals(video.id > 0, True)
 
     def test_invalid_name(self):
         try:

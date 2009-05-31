@@ -21,6 +21,7 @@
 from datetime import datetime
 from pybrightcove import PyBrightcoveError
 from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
+from pybrightcove import FilterChoicesEnum
 from pybrightcove import VideoCodecEnum, ItemStateEnum
 from pybrightcove import Connection, ItemResultSet
 
@@ -571,8 +572,23 @@ class Video(object):
             if data:
                 self.image = Image(data=data)
 
-    def find_releated(self):
-        raise PyBrightcoveError("Not yet implemented")
+    def find_related(self, connection=None, page_size=100, page_number=0):
+        if self.id:
+            return ItemResultSet('find_related_videos', Video, connection,
+                page_size, page_number, None, None, video_id=self.id)
+
+    @staticmethod
+    def find_modified(since, filter_list=[], connection=None, page_size=25,
+        page_number=0, sort_by=SortByType.CREATION_DATE,
+        sort_order=SortByOrderType.ASC):
+        if not isinstance(since, datetime):
+            msg = 'The parameter "since" must be a datetime object.'
+            raise PyBrightcoveError(msg)
+        filters = None
+        fdate = int(since.strftime("%s")) / 60  ## Minutes since UNIX time
+        return ItemResultSet('find_modified_videos', Video, connection,
+            page_size, page_number, sort_by, sort_order, from_date=fdate,
+            filter=filters)
 
     @staticmethod
     def find_all(connection=None, page_size=100, page_number=0,
