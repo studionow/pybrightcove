@@ -25,8 +25,8 @@ Test the Video object.
 import unittest
 import uuid
 from pybrightcove import PyBrightcoveError
-from pybrightcove import Video
-from pybrightcove import UploadStatusEnum
+from pybrightcove import Video, Image
+from pybrightcove import UploadStatusEnum, ImageTypeEnum
 
 ## NOTE: This are ids private to my account, if you want to run these tests
 ##       for yourself and have them pass, replace these with your own values.
@@ -105,11 +105,15 @@ class VideoTest(unittest.TestCase):
     def test_share(self):
         self.fail()
 
-    def test_add_image(self):
-        self.fail()
-
-    def test_update_image(self):
-        self.fail()
+    def test_set_image(self):
+        video = Video(id=TEST_VIDEO_ID)
+        self.assertEquals(video.image, None)
+        image = Image(reference_id="img-%s" % self.test_uuid,
+                      display_name="My Test Image",
+                      type=ImageTypeEnum.VIDEO_STILL)
+        video.set_image(image, filename='bears.png')
+        self.assertEquals(video.image != None, True)
+        self.assertEquals(video.image.id > 0, True)
 
     def test_find_by_tags(self):
         self.fail()

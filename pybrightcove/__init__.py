@@ -31,5 +31,5 @@ config = Config()
 
 
 from pybrightcove.connection import Connection, ItemResultSet
-from pybrightcove.video import Video
+from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist

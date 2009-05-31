@@ -43,70 +43,27 @@ class Image(object):
     [1] http://help.brightcove.com/developer/docs/mediaapi/add_image.cfm
     """
 
-    def __init__(self, data=None):
-        self._id = None
-        self._referenceId = None
-        self._type = None
-        self._remoteUrl = None
-        self._displayName = None
+    def __init__(self, data=None, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.reference_id = kwargs.get('reference_id', None)
+        self.type = kwargs.get('type', None)
+        self.remote_url = kwargs.get('remote_url', None)
+        self.display_name = kwargs.get('display_name', None)
 
         if data:
-            self._id = data['id']
-            self._referenceId = data['referenceId']
-            self._type = data['type']
-            self._remoteUrl = data["remoateUrl"]
-            self._displayName = data["displayName"]
-
-    def get_id(self):
-        return self._id
-
-    def get_referenceId(self):
-        return self._referenceId
-
-    def set_referenceId(self, referenceId):
-        self._referenceId = referenceId
-
-    def get_type(self):
-        return self._type
-
-    def set_type(self, image_type):
-        self._type = image_type
-
-    def get_remoteUrl(self):
-        return self._remoteUrl
-
-    def set_remoteUrl(self, remote_url):
-        self._remoteUrl = remote_url
-
-    def get_displayName(self):
-        return self._displayName
-
-    def set_displayName(self, display_name):
-        self._displayName = display_name
-
-    id = property(get_id,
-        doc="""A number that uniquely identifies this Image.
-            This id is automatically assigned by Brightcove when
-            the Image is created.""")
-
-    referenceId = property(get_referenceId, set_referenceId,
-        doc="""A user-specified id that uniquely identifies this Image.""")
-
-    type = property(get_type, set_type,
-        doc="""THUMBNAIL or VIDEO_STILL. The type is writable and required
-            when you create an Image; it cannot subsequently be
-
-            changed.""")
-    displayName = property(get_displayName, set_displayName,
-        doc="""The name of the asset, which will be displayed in the
-            Media module.""")
+            self.id = data['id']
+            self.reference_id = data['referenceId']
+            self.type = data['type']
+            self.remote_url = data["remoateUrl"]
+            self.display_name = data["displayName"]
 
     def to_dict(self):
         data = {
             'id': self.id,
-            'referenceId': self.referenceId,
+            'referenceId': self.reference_id,
             'type': self.type,
-            'displayName': self.displayName}
+            'displayName': self.display_name,
+            'remoateUrl': self.remote_url}
         for key in data.keys():
             if data[key] == None:
                 data.pop(key)
@@ -471,6 +428,8 @@ class Video(object):
         self.plays_total = None
         self.plays_trailing_week = None
 
+        self.image = None
+
         self.connection = connection
         if not self.connection:
             self.connection = Connection()
@@ -605,12 +564,12 @@ class Video(object):
             raise PyBrightcoveError("Video.share expects an iterable argument")
         raise PyBrightcoveError("Not yet implemented")
 
-    def add_image(self, reference_id, display_name, image_type, filename=None,
-            remote_url=None):
-        raise PyBrightcoveError("Not yet implemented")
-
-    def update_image(self, reference_id, filename=None, remote_url=None):
-        raise PyBrightcoveError("Not yet implemented")
+    def set_image(self, image, filename=None, resize=True):
+        if self.id:
+            data = self.connection.post('add_image', filename,
+                video_id=self.id, image=image.to_dict(), resize=resize)
+            if data:
+                self.image = Image(data=data)
 
     def find_releated(self):
         raise PyBrightcoveError("Not yet implemented")
