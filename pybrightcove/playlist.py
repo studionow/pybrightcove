@@ -18,128 +18,157 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pybrightcove import PlaylistTypeEnum
+from pybrightcove import PlaylistTypeEnum, SortByType, SortByOrderType
 from pybrightcove import Video
+from pybrightcove import Connection, ItemResultSet
+
+VALID_PLAYLIST_TYPES = (PlaylistTypeEnum.EXPLICIT,
+                        PlaylistTypeEnum.OLDEST_TO_NEWEST,
+                        PlaylistTypeEnum.NEWEST_TO_OLDEST,
+                        PlaylistTypeEnum.ALPHABETICAL,
+                        PlaylistTypeEnum.PLAYS_TOTAL,
+                        PlaylistTypeEnum.PLAYS_TRAILING_WEEK)
 
 
 class Playlist(object):
-    """The Playlist object is a collection of Videos."""
+    """
+    The Playlist object is a collection of Videos.
 
-    def __init__(self, data=None):
-        self._id = None
-        self._referenceId = None
-        self._name = None
-        self._shortDescription = None
-        self._thumbnailURL = None
-        self._filterTags = None
-        self._videos = None
-        self._videoIds = None
-        self._playlistType = None
+    id
+        A number that uniquely identifies this Playlist. This id is
+        automatically assigned when the Playlist is created.
+
+    reference_id
+        A user-specified id that uniquely identifies this Playlist.
+
+    account_id
+        A number that uniquely identifies the account to which this Playlist
+        belongs, assigned by Brightcove.
+
+    name
+        The title of this Playlist. The name is a required property when you
+        create a playlist.
+
+    short_description
+        A short description describing this Playlist, limited to 250
+        characters.
+
+    video_ids
+        A list of the ids of the Videos that are encapsulated in this Playlist.
+
+    videos
+        A list of the Video objects that are encapsulated in this Playlist.
+
+    type
+        Options are OLDEST_TO_NEWEST, NEWEST_TO_OLDEST, ALPHABETICAL,
+        PLAYSTRAILING, and PLAYSTRAILINGWEEK (each of which is a smart
+        playlist, ordered as indicated) or EXPLICIT (a manual playlist). The
+        type is a required property when you create a playlist.
+
+    thumbnail_url
+        The URL of the thumbnail associated with this Playlist.
+    """
+
+    def __init__(self, name=None, video_ids=None, type=None, id=None,
+        reference_id=None, data=None, connection=None):
+        self.id = None
+        self.reference_id = None
+        self.account_id = None
+        self.name = None
+        self.short_description = None
+        self.thumbnail_url = None
+        self.videos = []
+        self.video_ids = []
+        self.type = None
+
+        self.connection = connection
+        if not self.connection:
+            self.connection = Connection()
+
+        if name and isinstance(video_ids, (list, tuple)) and \
+            len(video_ids) > 0 and type in VALID_PLAYLIST_TYPES:
+            self.name = name
+            self.video_ids = video_ids
+            self.type = type
+        elif id or reference_id:
+            self.id = id
+            self.reference_id = reference_id
+            self._find_playlist()
+        elif data:
+            self._load(data)
+        else:
+            raise PyBrightcoveError('Invalid parameters for Video.')
+
+    def __setattr__(self, name, value):
+        msg = None
+        if value:
+            if name == 'name' and len(value) > 60:
+                # val = value[:60] ## Is this better?
+                msg = "Playlist.name must be 60 characters or less."
+            if name == 'reference_id' and len(value) > 150:
+                # val = value[:150]
+                msg = "Playlist.reference_id must be 150 characters or less."
+            if name == 'short_description' and len(value) > 250:
+                # val = value[:250]
+                msg = "Playlist.short_description must be 250 chars or less."
+            if name == 'type' and value not in VALID_PLAYLIST_TYPES:
+                msg = "Playlist.type must be a valid PlaylistTypeEnum"
+            if msg:
+                raise PyBrightcoveError(msg)
+        return super(Playlist, self).__setattr__(name, value)
+
+    def _find_playlist(self):
+        data = None
+        if self.id:
+            data = self.connection.get_item(
+                'find_playlist_by_id', playlist_id=self.id)
+        elif self.reference_id:
+            data = self.connection.get_item(
+                'find_playlist_by_reference_id',
+                reference_id=self.reference_id)
 
         if data:
-            self._id = data['id']
-            self._referenceId = data['referenceId']
-            self._name = data['name']
-            self._shortDescription = data['shortDescription']
-            self._thumbnailURL = data['thumbnailURL']
-            self._filterTags = data['filterTags']
-            self._videoIds = data['videoIds']
-            self._playlistType = data['playlistType']
+            self._load(data)
 
-            for video in data.get('videos', []):
-                self.videos.append(Video(data=video))
+    def _load(self, data):
+        self.id = data['id']
+        self.reference_id = data['referenceId']
+        self.name = data['name']
+        self.short_description = data['shortDescription']
+        self.thumbnail_url = data['thumbnailURL']
+        self.videos = []
+        self.video_ids = data['videoIds']
+        self.type = data['playlistType']
 
-    def get_id(self):
-        return self._id
+        for video in data.get('videos', []):
+            self.videos.append(Video(data=video))
 
-    def get_referenceId(self):
-        return self._referenceId
+    @staticmethod
+    def find_all(connection=None, page_size=100, page_number=0,
+        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        return ItemResultSet('find_all_playlists', Playlist, connection,
+            page_size, page_number, sort_by, sort_order)
 
-    def set_referenceId(self, referenceId):
-        self._referenceId = referenceId
+    @staticmethod
+    def find_by_ids(ids, connection=None, page_size=100, page_number=0,
+        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        ids = ','.join([str(i) for i in ids])
+        return ItemResultSet('find_playlists_by_ids', Playlist, connection,
+            page_size, page_number, sort_by, sort_order, playlist_ids=ids)
 
-    def get_name(self):
-        return self._name
+    @staticmethod
+    def find_by_reference_ids(reference_ids, connection=None, page_size=100,
+        page_number=0, sort_by=SortByType.CREATION_DATE,
+        sort_order=SortByOrderType.ASC):
+        reference_ids = ','.join([str(i) for i in reference_ids])
+        return ItemResultSet('find_playlists_by_reference_ids', Playlist,
+            connection, page_size, page_number, sort_by, sort_order,
+            reference_ids=reference_ids)
 
-    def set_name(self, name):
-        self._name = name
-
-    def get_shortDescription(self):
-        return self._shortDescription
-
-    def set_shortDescription(self, short_description):
-        self._shortDescription = short_description[:250]
-
-    def get_filterTags(self):
-        if not self._filterTags:
-            self._filterTags = []
-        return self._filterTags
-
-    def set_filterTags(self, tags):
-        self._filterTags = tags
-
-    def get_videoIds(self):
-        if not self._videoIds:
-            self._videoIds = []
-        return self._videoIds
-
-    def set_videoIds(self, video_ids):
-        self._videoIds = video_ids
-
-    def get_videos(self):
-        if not self._videos:
-            self._videos = []
-        return self._videos
-
-    def set_videos(self, videos):
-        self._videos = videos
-
-    def get_playlistType(self):
-        return self._playlistType
-
-    def set_playlistType(self, playlist_type):
-        if playlist_type not in PlaylistTypeEnum.__dict__.values():
-            raise TypeError("Invalid Playlist Type")
-        self._playlistType = playlist_type
-
-    def get_thumbnailURL(self):
-        return self._thumbnailURL
-
-    def set_thumbnailURL(self, thumbnail_url):
-        self._thumbnailURL = thumbnail_url
-
-    id = property(get_id,
-        doc="""A number that uniquely identifies this Playlist.
-            This id is automatically assigned when the Playlist is created.""")
-
-    referenceId = property(get_referenceId, set_referenceId,
-        doc="""A user-specified id that uniquely identifies this Playlist.""")
-
-    name = property(get_name, set_name,
-        doc="""TThe title of this Playlist. The name is a required property
-            when you create a playlist.""")
-
-    shortDescription = property(get_shortDescription, set_shortDescription,
-        doc="""A short description describing this Playlist, limited to 250
-            characters.""")
-
-    filterTags = property(get_filterTags, set_filterTags,
-        doc="""filterTags""")
-
-    videoIds = property(get_videoIds, set_videoIds,
-        doc="""A list of the ids of the Videos that are encapsulated in this
-            Playlist.""")
-
-    videos = property(get_videos, set_videos,
-        doc="""A list of the Video objects that are encapsulated in this
-            Playlist.""")
-
-    playlistType = property(get_playlistType, set_playlistType,
-        doc="""Options are OLDEST_TO_NEWEST, NEWEST_TO_OLDEST, ALPHABETICAL,
-            PLAYSTRAILING, and PLAYSTRAILINGWEEK (each of which is a smart
-            playlist, ordered as indicated) or EXPLICIT (a manual playlist).
-            The playlistType is a required property when you create a
-            playlist.""")
-
-    thumbnailURL = property(get_thumbnailURL, set_thumbnailURL,
-        doc="""The URL of the thumbnail associated with this Playlist.""")
+    @staticmethod
+    def find_for_player_id(player_id, connection=None, page_size=100,
+        page_number=0, sort_by=SortByType.CREATION_DATE,
+        sort_order=SortByOrderType.ASC):
+        return ItemResultSet('find_playlists_for_player_id', Playlist,
+            connection, page_size, page_number, sort_by, sort_order,
+            player_id=player_id)

@@ -23,7 +23,13 @@ Test the Playlist object
 """
 
 import unittest
-from pybrightcove import Playlist
+from pybrightcove import Playlist, PlaylistTypeEnum
+from pybrightcove.tests.video import TEST_VIDEO_IDS
+
+TEST_PLAYLIST_ID = 24781161001
+TEST_PLAYLIST_IDS = [TEST_PLAYLIST_ID, 10518202001]
+TEST_PLAYLIST_REF_ID = 'unittest-playlist'
+TEST_PLAYLIST_REF_IDS = [TEST_PLAYLIST_REF_ID, 'test']
 
 
 class PlaylistTest(unittest.TestCase):
@@ -32,13 +38,21 @@ class PlaylistTest(unittest.TestCase):
         pass
 
     def test_instantiate_new(self):
-        self.fail()
+        playlist = Playlist(name='My Playlist', video_ids=TEST_VIDEO_IDS,
+            type=PlaylistTypeEnum.EXPLICIT)
+        self.assertEquals(playlist.id, None)
+        self.assertEquals(playlist.name, 'My Playlist')
+        self.assertEquals(playlist.type, PlaylistTypeEnum.EXPLICIT)
+        self.assertEquals(playlist.video_ids, TEST_VIDEO_IDS)
+        self.assertEquals(playlist.short_description, None)
 
     def test_instantiate_with_playlist_id(self):
-        self.fail()
+        playlist = Playlist(id=TEST_PLAYLIST_ID)
+        self.assertEquals(playlist.reference_id, TEST_PLAYLIST_REF_ID)
 
     def test_instantiate_with_reference_id(self):
-        self.fail()
+        playlist = Playlist(reference_id=TEST_PLAYLIST_REF_ID)
+        self.assertEquals(playlist.id, TEST_PLAYLIST_ID)
 
     def test_instantiate_with_invalid_parameters(self):
         self.fail()
@@ -53,13 +67,24 @@ class PlaylistTest(unittest.TestCase):
         self.fail()
 
     def test_find_by_ids(self):
-        self.fail()
+        playlists = Playlist.find_by_ids(TEST_PLAYLIST_IDS)
+        for playlist in playlists:
+            self.assertEquals(type(playlist), Playlist)
+            self.assertEquals(playlist.id in TEST_PLAYLIST_IDS, True)
 
     def test_find_by_reference_ids(self):
-        self.fail()
+        playlists = Playlist.find_by_reference_ids(TEST_PLAYLIST_REF_IDS)
+        for playlist in playlists:
+            self.assertEquals(type(playlist), Playlist)
+            self.assertEquals(playlist.reference_id in TEST_PLAYLIST_REF_IDS,
+                True)
 
-    def test_find_by_player_id(self):
-        self.fail()
+    def test_find_for_player_id(self):
+        playlists = Playlist.find_for_player_id(23424255)
+        for playlist in playlists:
+            self.assertEquals(type(playlist), Playlist)
 
     def test_find_all(self):
-        self.fail()
+        playlists = Playlist.find_all()
+        for playlist in playlists:
+            self.assertEquals(type(playlist), Playlist)
