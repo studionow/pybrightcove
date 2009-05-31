@@ -25,7 +25,6 @@ import urllib
 import cookielib
 from pybrightcove import config, UserAgent
 from pybrightcove import SortByType, SortByOrderType
-from pybrightcove import PublicVideoFieldsEnum
 from pybrightcove import BrightcoveError
 from pybrightcove.multipart import MultipartPostHandler
 
