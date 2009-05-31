@@ -23,7 +23,8 @@ Test the Playlist object
 """
 
 import unittest
-from pybrightcove import Playlist, PlaylistTypeEnum
+import uuid
+from pybrightcove import Playlist, PlaylistTypeEnum, Video, PyBrightcoveError
 from pybrightcove.tests.video import TEST_VIDEO_IDS
 
 TEST_PLAYLIST_ID = 24781161001
@@ -35,7 +36,7 @@ TEST_PLAYLIST_REF_IDS = [TEST_PLAYLIST_REF_ID, 'test']
 class PlaylistTest(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.test_uuid = str(uuid.uuid4())
 
     def test_instantiate_new(self):
         playlist = Playlist(name='My Playlist', video_ids=TEST_VIDEO_IDS,
@@ -55,16 +56,34 @@ class PlaylistTest(unittest.TestCase):
         self.assertEquals(playlist.id, TEST_PLAYLIST_ID)
 
     def test_instantiate_with_invalid_parameters(self):
-        self.fail()
+        try:
+            playlist = Playlist(name="No type specified")
+            self.fail('Should have raised an error.')
+        except PyBrightcoveError, e:
+            self.assertEquals(e.message, 'Invalid parameters for Video.')
 
     def test_save_new(self):
-        self.fail()
+        playlist = Playlist(name="Unit Test Videos",
+            type=PlaylistTypeEnum.EXPLICIT)
+        for video in Video.find_by_tags(and_tags=['unittest', ]):
+            playlist.videos.append(video)
+        playlist.save()
+        self.assertEquals(playlist.id > 0, True)
 
     def test_save_update(self):
-        self.fail()
+        playlist = Playlist(id=TEST_PLAYLIST_ID)
+        playlist.name = 'test-%s' % self.test_uuid
+        playlist.save()
+        self.assertEquals(playlist.name, 'test-%s' % self.test_uuid)
 
     def test_delete(self):
-        self.fail()
+        playlist = Playlist(name="DELETE - Unit Test Videos",
+            type=PlaylistTypeEnum.EXPLICIT)
+        for video in Video.find_by_tags(and_tags=['unittest', ]):
+            playlist.videos.append(video)
+        playlist.save()
+        playlist.delete()
+        self.assertEquals(playlist.id, None)
 
     def test_find_by_ids(self):
         playlists = Playlist.find_by_ids(TEST_PLAYLIST_IDS)

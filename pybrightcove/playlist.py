@@ -21,6 +21,7 @@
 from pybrightcove import PlaylistTypeEnum, SortByType, SortByOrderType
 from pybrightcove import Video
 from pybrightcove import Connection, ItemResultSet
+from pybrightcove import PyBrightcoveError
 
 VALID_PLAYLIST_TYPES = (PlaylistTypeEnum.EXPLICIT,
                         PlaylistTypeEnum.OLDEST_TO_NEWEST,
@@ -69,7 +70,7 @@ class Playlist(object):
         The URL of the thumbnail associated with this Playlist.
     """
 
-    def __init__(self, name=None, video_ids=None, type=None, id=None,
+    def __init__(self, name=None, video_ids=[], type=None, id=None,
         reference_id=None, data=None, connection=None):
         self.id = None
         self.reference_id = None
@@ -86,7 +87,7 @@ class Playlist(object):
             self.connection = Connection()
 
         if name and isinstance(video_ids, (list, tuple)) and \
-            len(video_ids) > 0 and type in VALID_PLAYLIST_TYPES:
+            type in VALID_PLAYLIST_TYPES:
             self.name = name
             self.video_ids = video_ids
             self.type = type
@@ -130,6 +131,21 @@ class Playlist(object):
         if data:
             self._load(data)
 
+    def _to_dict(self):
+        data = {
+            'name': self.name,
+            'referenceId': self.reference_id,
+            'shortDescription': self.short_description,
+            'playlistType': self.type}
+        if self.videos:
+            for video in self.videos:
+                if video.id not in self.video_ids:
+                    self.video_ids.append(video.id)
+        if self.video_ids:
+            data['videoIds'] = self.video_ids
+        [data.pop(key) for key in data.keys() if data[key] == None]
+        return data
+
     def _load(self, data):
         self.id = data['id']
         self.reference_id = data['referenceId']
@@ -142,6 +158,22 @@ class Playlist(object):
 
         for video in data.get('videos', []):
             self.videos.append(Video(data=video))
+
+    def save(self):
+        d = self._to_dict()
+        if len(d.get('videoIds', [])) > 0:
+            if not self.id:
+                self.id = self.connection.post('create_playlist', playlist=d)
+            else:
+                data = self.connection.post('update_playlist', playlist=d)
+                if data:
+                    self._load(data)
+
+    def delete(self, cascade=False):
+        if self.id:
+            self.connection.post('delete_playlist', playlist_id=self.id,
+                cascade=cascade)
+            self.id = None
 
     @staticmethod
     def find_all(connection=None, page_size=100, page_number=0,
