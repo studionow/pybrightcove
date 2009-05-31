@@ -580,21 +580,25 @@ class Video(object):
         """
         Creates or updates the video
         """
-        if not self.id:
+        if not self.id and self._filename:
             self.id = self.connection.post('create_video', self._filename,
                 create_multiple_renditions=True,
                 preserve_source_rendition=True,
                 video=self._to_dict())
-        else:
+        elif self.id:
             data = self.connection.post('update_video', video=self._to_dict())
             if data:
                 self._load(data)
 
-    def delete(self):
-        raise PyBrightcoveError("Not yet implemented")
+    def delete(self, cascade=False, delete_shares=False):
+        if self.id:
+            self.connection.post('delete_video', video_id=self.id,
+                cascade=cascade, delete_shares=delete_shares)
+            self.id = None ## Prevent more activity on this video id
 
     def get_upload_status(self):
-        raise PyBrightcoveError("Not yet implemented")
+        if self.id:
+            return self.connection.post('get_upload_status', video_id=self.id)
 
     def share(self, accounts):
         if not isinstance(accounts, (list, tuple)):

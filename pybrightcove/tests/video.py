@@ -26,6 +26,7 @@ import unittest
 import uuid
 from pybrightcove import PyBrightcoveError
 from pybrightcove import Video
+from pybrightcove import UploadStatusEnum
 
 ## NOTE: This are ids private to my account, if you want to run these tests
 ##       for yourself and have them pass, replace these with your own values.
@@ -86,10 +87,20 @@ class VideoTest(unittest.TestCase):
         self.assertNotEquals(video.last_modified_date, lmd)
 
     def test_get_upload_status(self):
-        self.fail()
+        video = Video(filename='bears.mov', name='STATUS TEST The Bears',
+            short_description='Opening roll for an exciting soccer match.')
+        video.tags.append('unittest')
+        video.save()
+        status = video.get_upload_status()
+        self.assertEquals(status, UploadStatusEnum.PROCESSING)
 
     def test_delete(self):
-        self.fail()
+        video = Video(filename='bears.mov', name='DELETE TEST The Bears',
+            short_description='Opening roll for an exciting soccer match.')
+        video.tags.append('unittest')
+        video.save()
+        video.delete()
+        self.assertEquals(video.id, None)
 
     def test_share(self):
         self.fail()
