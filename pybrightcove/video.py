@@ -55,7 +55,7 @@ class Image(object):
             self.id = data['id']
             self.reference_id = data['referenceId']
             self.type = data['type']
-            self.remote_url = data["remoateUrl"]
+            self.remote_url = data["remoteUrl"]
             self.display_name = data["displayName"]
 
     def to_dict(self):
@@ -430,6 +430,7 @@ class Video(object):
         self.plays_trailing_week = None
 
         self.image = None
+        self.raw_data = None
 
         self.connection = connection
         if not self.connection:
@@ -458,6 +459,7 @@ class Video(object):
                 'find_video_by_reference_id', reference_id=self.reference_id)
 
         if data:
+            self.raw_data = data
             self._load(data)
 
     def _to_dict(self):

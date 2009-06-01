@@ -113,7 +113,7 @@ class VideoTest(unittest.TestCase):
         image = Image(reference_id="img-%s" % self.test_uuid,
                       display_name="My Test Image",
                       type=ImageTypeEnum.VIDEO_STILL)
-        video.set_image(image, filename='bears.png')
+        video.set_image(image, filename='IMG_0050.JPG')
         self.assertEquals(video.image != None, True)
         self.assertEquals(video.image.id > 0, True)
 

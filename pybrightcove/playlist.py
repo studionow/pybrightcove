@@ -82,6 +82,8 @@ class Playlist(object):
         self.video_ids = []
         self.type = None
 
+        self.raw_data = None
+
         self.connection = connection
         if not self.connection:
             self.connection = Connection()
@@ -129,6 +131,7 @@ class Playlist(object):
                 reference_id=self.reference_id)
 
         if data:
+            self.raw_data = data
             self._load(data)
 
     def _to_dict(self):
