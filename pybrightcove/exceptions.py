@@ -25,6 +25,12 @@ class PyBrightcoveError(Exception):
         super(PyBrightcoveError, self).__init__(reason)
 
 
+class NoDataFoundError(PyBrightcoveError):
+
+    def __init__(self, reason=None):
+        super(NoDataFoundError, self).__init__(reason)
+
+
 class BrightcoveError(Exception):
     description = "a general error"
 

@@ -25,7 +25,7 @@ import urllib
 import cookielib
 from pybrightcove import config, UserAgent
 from pybrightcove import SortByType, SortByOrderType
-from pybrightcove import BrightcoveError
+from pybrightcove import BrightcoveError, NoDataFoundError
 from pybrightcove.multipart import MultipartPostHandler
 
 
@@ -81,8 +81,10 @@ class Connection(object):
                 url += "&%s=%s" % (key, val)
         req = urllib2.urlopen(url)
         data = simplejson.loads(req.read())
-        if 'error' in data and data['error']:
+        if data and data.get('error', None):
             BrightcoveError.raise_exception(data['error'])
+        if data == None:
+            raise NoDataFoundError("No data found for %s" % repr(kwargs))
         return data
 
     def post(self, command, file_to_upload=None, **kwargs):
