@@ -120,7 +120,9 @@ class Connection(object):
                                   video_fields=None,
                                   get_item_count="true",
                                   **kwargs)
-        return ItemCollection(data=data, item_class=item_class)
+        return ItemCollection(data=data,
+                              item_class=item_class,
+                              connection=self)
 
     def get_item(self, command, **kwargs):
         data = self._get_response(command=command, **kwargs)
@@ -177,7 +179,7 @@ class ItemResultSet(object):
 
 class ItemCollection(object):
 
-    def __init__(self, data, item_class):
+    def __init__(self, data, item_class, connection=None):
         self.total_count = None
         self.items = None
         self.page_number = None
@@ -188,4 +190,4 @@ class ItemCollection(object):
         self.page_number = int(data['page_number'])
         self.page_size = int(data['page_size'])
         for item in data['items']:
-            self.items.append(item_class(data=item))
+            self.items.append(item_class(data=item, connection=connection))
