@@ -44,6 +44,8 @@ class BrightcoveError(Exception):
         if "code" in data and data["code"] in ERROR_MAP:
             error = ERROR_MAP[data["code"]]()
             error.raw_data = data
+            if data.get('message', None):
+                error.description = data['message']
 
         raise error
 
