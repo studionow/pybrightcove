@@ -579,6 +579,19 @@ class Video(object):
             return ItemResultSet('find_related_videos', Video, connection,
                 page_size, page_number, None, None, video_id=self.id)
 
+    def deactivate(self):
+        self.item_state = ItemStateEnum.INACTIVE
+        self.save()
+
+    @staticmethod
+    def activate(video_id, connection=None):
+        c = connection
+        if not c:
+            c = Connection()
+        data = c.post('update_video', video={
+            'id': video_id, 'itemState': ItemStateEnum.ACTIVE})
+        return Video(data=data)
+
     @staticmethod
     def find_modified(since, filter_list=[], connection=None, page_size=25,
         page_number=0, sort_by=SortByType.CREATION_DATE,
