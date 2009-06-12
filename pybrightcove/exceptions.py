@@ -49,6 +49,12 @@ class BrightcoveError(Exception):
 
         raise error
 
+    def __unicode__(self):
+        return u'%s' % self.description
+
+    def __str__(self):
+        return self.description
+
 
 class UnknownServerError(BrightcoveError):
     description = "an unknown error occurred while processing your request"
