@@ -70,8 +70,8 @@ class Playlist(object):
         The URL of the thumbnail associated with this Playlist.
     """
 
-    def __init__(self, name=None, video_ids=[], type=None, id=None,
-        reference_id=None, data=None, connection=None):
+    def __init__(self, name=None, type=None, id=None, reference_id=None,
+        data=None, connection=None):
         self.id = None
         self.reference_id = None
         self.account_id = None
@@ -88,10 +88,8 @@ class Playlist(object):
         if not self.connection:
             self.connection = Connection()
 
-        if name and isinstance(video_ids, (list, tuple)) and \
-            type in VALID_PLAYLIST_TYPES:
+        if name and type in VALID_PLAYLIST_TYPES:
             self.name = name
-            self.video_ids = video_ids
             self.type = type
         elif id or reference_id:
             self.id = id
