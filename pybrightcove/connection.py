@@ -46,11 +46,15 @@ class Connection(object):
             self.read_url = kwargs['read_url']
         elif config.has_option('Connection', 'read_url'):
             self.read_url = config.get('Connection', 'read_url')
+        else:
+            self.read_url = 'http://api.brightcove.com/services/library'
 
         if 'write_url' in kwargs:
             self.write_url = kwargs['write_url']
         elif config.has_option('Connection', 'write_url'):
             self.write_url = config.get('Connection', 'write_url')
+        else:
+            self.write_url = 'http://api.brightcove.com/services/post'
 
     def _post(self, data, file_to_upload=None):
         params = {"JSONRPC": simplejson.dumps(data)}
