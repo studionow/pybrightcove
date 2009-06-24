@@ -463,6 +463,10 @@ class Video(object):
             self._load(data)
 
     def _to_dict(self):
+        for i, tag in enumerate(self.tags):
+            if tag in ("", None):
+                self.tags.pop(i)
+
         data = {
             'name': self.name,
             'referenceId': self.reference_id,
