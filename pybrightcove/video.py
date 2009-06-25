@@ -477,6 +477,7 @@ class Video(object):
             'linkText': self.link_text,
             'tags': self.tags,
             'economics': self.economics,
+            'id': self.id
 
             # TODO: Don't support the saving/updating of these values yet.
             #'geoFiltered': self.geo_filtered,

@@ -137,7 +137,8 @@ class Playlist(object):
             'name': self.name,
             'referenceId': self.reference_id,
             'shortDescription': self.short_description,
-            'playlistType': self.type}
+            'playlistType': self.type,
+            'id': self.id}
         if self.videos:
             for video in self.videos:
                 if video.id not in self.video_ids:
