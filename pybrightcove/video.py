@@ -22,7 +22,7 @@ from datetime import datetime
 from pybrightcove import PyBrightcoveError
 from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
 from pybrightcove import FilterChoicesEnum
-from pybrightcove import VideoCodecEnum, ItemStateEnum
+from pybrightcove import VideoCodecEnum, ItemStateEnum, EncodeToEnum
 from pybrightcove import Connection, ItemResultSet
 
 
@@ -478,7 +478,6 @@ class Video(object):
             'tags': self.tags,
             'economics': self.economics,
             'id': self.id
-
             # TODO: Don't support the saving/updating of these values yet.
             #'geoFiltered': self.geo_filtered,
             #'geoFilteredCountries': self.geo_filtered_countries,
@@ -543,14 +542,17 @@ class Video(object):
                 raise PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
 
-    def save(self):
+    def save(self, create_multiple_renditions=True,
+        preserve_source_rendition=True,
+        encode_to=EncodeToEnum.FLV):
         """
         Creates or updates the video
         """
         if not self.id and self._filename:
             self.id = self.connection.post('create_video', self._filename,
-                create_multiple_renditions=True,
-                preserve_source_rendition=True,
+                create_multiple_renditions=create_multiple_renditions,
+                preserve_source_rendition=preserve_source_rendition,
+                encode_to=encode_to,
                 video=self._to_dict())
         elif self.id:
             data = self.connection.post('update_video', video=self._to_dict())

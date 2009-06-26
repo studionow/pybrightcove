@@ -81,6 +81,11 @@ class EconomicsEnum(object):
     AD_SUPPORTED = "AD_SUPPORTED"
 
 
+class EncodeToEnum(object):
+    MP4 = 'MP4'
+    FLV = 'FLV'
+
+
 class ItemStateEnum(object):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
