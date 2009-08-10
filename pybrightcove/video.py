@@ -825,3 +825,10 @@ class Video(object):
         ids = ','.join([str(i) for i in ids])
         return ItemResultSet('find_videos_by_ids', Video, connection,
             page_size, page_number, sort_by, sort_order, video_ids=ids)
+
+    @staticmethod
+    def delete_by_id(id, connection=None, cascade=False, delete_shares=False):
+        if connection is None:
+            connection=Connection()
+        connection.post('delete_video', video_id=id,
+            cascade=cascade, delete_shares=delete_shares)
