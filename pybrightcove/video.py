@@ -599,7 +599,7 @@ class Video(object):
         self.save()
     
     @staticmethod
-    def delete_videeo(video_id, cascade=False, delete_shares=False, connection=None):
+    def delete_video(video_id, cascade=False, delete_shares=False, connection=None):
         c = connection
         if not c:
             c = Connection()
