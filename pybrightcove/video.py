@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import time
 from datetime import datetime
 from pybrightcove import PyBrightcoveError
 from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
@@ -30,6 +31,9 @@ def _convert_tstamp(val):
     if val:
         return datetime.fromtimestamp(float(val)/1000)
 
+def _make_tstamp(val):
+    if val:
+        return int(time.mktime(val.timetuple()) * 1000)
 
 class Image(object):
     """
@@ -459,7 +463,6 @@ class Video(object):
                 'find_video_by_reference_id', reference_id=self.reference_id)
 
         if data:
-            self.raw_data = data
             self._load(data)
 
     def _to_dict(self):
@@ -477,7 +480,9 @@ class Video(object):
             'linkText': self.link_text,
             'tags': self.tags,
             'economics': self.economics,
-            'id': self.id
+            'id': self.id,
+            'end_date': _make_tstamp(self.end_date),
+            'start_date': _make_tstamp(self.start_date)
             # TODO: Don't support the saving/updating of these values yet.
             #'geoFiltered': self.geo_filtered,
             #'geoFilteredCountries': self.geo_filtered_countries,
@@ -490,6 +495,7 @@ class Video(object):
         return data
 
     def _load(self, data):
+        self.raw_data = data
         self.creation_date = _convert_tstamp(data['creationDate'])
         self.economics = data['economics']
         self.id = data['id']
@@ -502,6 +508,8 @@ class Video(object):
         self.plays_total = data['playsTotal']
         self.plays_trailing_week = data['playsTrailingWeek']
         self.published_date = _convert_tstamp(data['publishedDate'])
+        self.start_date = _convert_tstamp(data.get('startDate', None))
+        self.end_date = _convert_tstamp(data.get('endDate', None))
         self.reference_id = data['referenceId']
         self.short_description = data['shortDescription']
         self.tags = []
@@ -589,6 +597,13 @@ class Video(object):
     def deactivate(self):
         self.item_state = ItemStateEnum.INACTIVE
         self.save()
+    
+    @staticmethod
+    def get_status(video_id, connection=None):
+        c = connection
+        if not c:
+            c = Connection()
+        return c.post('get_upload_status', video_id=video_id)        
 
     @staticmethod
     def activate(video_id, connection=None):

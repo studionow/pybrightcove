@@ -129,7 +129,6 @@ class Playlist(object):
                 reference_id=self.reference_id)
 
         if data:
-            self.raw_data = data
             self._load(data)
 
     def _to_dict(self):
@@ -149,6 +148,7 @@ class Playlist(object):
         return data
 
     def _load(self, data):
+        self.raw_data = data
         self.id = data['id']
         self.reference_id = data['referenceId']
         self.name = data['name']
