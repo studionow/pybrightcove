@@ -134,7 +134,7 @@ class Connection(object):
 
 
 def item_lister(command, connection, page_size, page_number, sort_by,
-    sort_order, item_class, **kwargs):
+    sort_order, item_class, result_set, **kwargs):
     """
     A generator function for listing Video and Playlist objects.
     """
@@ -147,6 +147,8 @@ def item_lister(command, connection, page_size, page_number, sort_by,
                                              sort_order=sort_order,
                                              item_class=item_class,
                                              **kwargs)
+        result_set.total_count = itemCollection.total_count
+        result_set.page_number = page
         for item in itemCollection.items:
             yield item
         if itemCollection.total_count < 0 or itemCollection.page_size == 0:
@@ -174,11 +176,12 @@ class ItemResultSet(object):
         self.sort_order = sort_order
         self.item_class = item_class
         self.kwargs = kwargs
+        self.total_count = None
 
     def __iter__(self):
         return item_lister(self.command, self.connection, self.page_size,
             self.page_number, self.sort_by, self.sort_order, self.item_class,
-            **self.kwargs)
+            self, **self.kwargs)
 
 
 class ItemCollection(object):
