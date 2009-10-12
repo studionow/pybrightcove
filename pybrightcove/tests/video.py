@@ -104,9 +104,6 @@ class VideoTest(unittest.TestCase):
         video.delete()
         self.assertEquals(video.id, None)
 
-    def test_share(self):
-        self.fail()
-
     def test_set_image(self):
         video = Video(id=TEST_VIDEO_ID)
         self.assertEquals(video.image, None)

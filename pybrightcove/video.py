@@ -31,9 +31,11 @@ def _convert_tstamp(val):
     if val:
         return datetime.fromtimestamp(float(val)/1000)
 
+
 def _make_tstamp(val):
     if val:
         return int(time.mktime(val.timetuple()) * 1000)
+
 
 class Image(object):
     """
@@ -482,15 +484,7 @@ class Video(object):
             'economics': self.economics,
             'id': self.id,
             'end_date': _make_tstamp(self.end_date),
-            'start_date': _make_tstamp(self.start_date)
-            # TODO: Don't support the saving/updating of these values yet.
-            #'geoFiltered': self.geo_filtered,
-            #'geoFilteredCountries': self.geo_filtered_countries,
-            #'geoFilteredExclude': self.geo_filtered_exclude,
-            #'cuePoints': self.cue_points,
-            #'renditions': self.renditions,
-            #'videoFullLength': self.video_full_length
-        }
+            'start_date': _make_tstamp(self.start_date)}
         [data.pop(key) for key in data.keys() if data[key] == None]
         return data
 
@@ -597,20 +591,22 @@ class Video(object):
     def deactivate(self):
         self.item_state = ItemStateEnum.INACTIVE
         self.save()
-    
+
     @staticmethod
-    def delete_video(video_id, cascade=False, delete_shares=False, connection=None):
+    def delete_video(video_id, cascade=False, delete_shares=False,
+        connection=None):
         c = connection
         if not c:
             c = Connection()
-        c.post('delete_video', video_id=video_id, cascade=cascade, delete_shares=delete_shares)
+        c.post('delete_video', video_id=video_id, cascade=cascade,
+            delete_shares=delete_shares)
 
     @staticmethod
     def get_status(video_id, connection=None):
         c = connection
         if not c:
             c = Connection()
-        return c.post('get_upload_status', video_id=video_id)        
+        return c.post('get_upload_status', video_id=video_id)
 
     @staticmethod
     def activate(video_id, connection=None):

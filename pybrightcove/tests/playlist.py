@@ -39,8 +39,8 @@ class PlaylistTest(unittest.TestCase):
         self.test_uuid = str(uuid.uuid4())
 
     def test_instantiate_new(self):
-        playlist = Playlist(name='My Playlist', video_ids=TEST_VIDEO_IDS,
-            type=PlaylistTypeEnum.EXPLICIT)
+        playlist = Playlist(name='My Playlist', type=PlaylistTypeEnum.EXPLICIT)
+        playlist.video_ids = TEST_VIDEO_IDS
         self.assertEquals(playlist.id, None)
         self.assertEquals(playlist.name, 'My Playlist')
         self.assertEquals(playlist.type, PlaylistTypeEnum.EXPLICIT)

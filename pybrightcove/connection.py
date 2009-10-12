@@ -26,7 +26,8 @@ import cookielib
 from pybrightcove import config, UserAgent
 from pybrightcove import SortByType, SortByOrderType
 from pybrightcove import BrightcoveError, NoDataFoundError
-from pybrightcove.multipart import MultipartPostHandler
+from pybrightcove.http_core import HttpRequest, ProxiedHttpClient
+from pybrightcove.http_core import MIME_BOUNDARY
 
 
 class Connection(object):
@@ -60,11 +61,17 @@ class Connection(object):
         params = {"JSONRPC": simplejson.dumps(data)}
         req = None
         if file_to_upload:
-            cookies = cookielib.CookieJar()
-            cproc = urllib2.HTTPCookieProcessor(cookies)
-            opener = urllib2.build_opener(cproc, MultipartPostHandler)
-            params["filePath"] = open(file_to_upload, "rb")
-            req = opener.open(self.write_url, params)
+            req = HttpRequest(self.write_url)
+            req.method = 'POST'
+            req.add_body_part("JSONRPC", simplejson.dumps(data), 'text/plain')
+            req.add_body_part("filePath", open(file_to_upload, "rb"),
+                'application/octet-stream')
+            req.end_of_parts()
+            req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' \
+                % MIME_BOUNDARY
+            req.headers['User-Agent'] = 'pybrightcove'
+
+            req = ProxiedHttpClient().request(req)
         else:
             msg = urllib.urlencode({'json': params['JSONRPC']})
             req = urllib2.urlopen(self.write_url, msg)
