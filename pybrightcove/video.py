@@ -18,13 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import os
 import time
+import hashlib
 from datetime import datetime
 from pybrightcove import PyBrightcoveError
 from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
-from pybrightcove import FilterChoicesEnum
+from pybrightcove import FilterChoicesEnum, AssetTypeEnum
 from pybrightcove import VideoCodecEnum, ItemStateEnum, EncodeToEnum
-from pybrightcove import Connection, ItemResultSet
+from pybrightcove import FTPConnection, APIConnection, ItemResultSet
 
 
 def _convert_tstamp(val):
@@ -414,6 +416,7 @@ class Video(object):
         self.long_description = None
         self.flv_url = None
         self.renditions = []
+        self.assets = []
         self.video_full_length = None
         self.creation_date = None
         self.published_date = None
@@ -440,20 +443,29 @@ class Video(object):
 
         self.connection = connection
         if not self.connection:
-            self.connection = Connection()
+            self.connection = APIConnection()
 
-        if filename and name and short_description:
-            self._filename = filename
-            self.name = name
-            self.short_description = short_description
-        elif id or reference_id:
-            self.id = id
-            self.reference_id = reference_id
-            self._find_video()
-        elif data:
-            self._load(data)
+        if isinstance(self.connection, APIConnection):
+            if filename and name and short_description:
+                self._filename = filename
+                self.name = name
+                self.short_description = short_description
+            elif id or reference_id:
+                self.id = id
+                self.reference_id = reference_id
+                self._find_video()
+            elif data:
+                self._load(data)
+            else:
+                raise PyBrightcoveError('Invalid parameters for Video.')
+        elif isinstance(self.connection, FTPConnection):
+            if reference_id and name:
+                self.reference_id = reference_id
+                self.name = name
+            else:
+                raise PyBrightcoveError("Invalid parameters for Video.")
         else:
-            raise PyBrightcoveError('Invalid parameters for Video.')
+            raise PyBrightcoveError("Invalid connection type for Video.")
 
     def _find_video(self):
         data = None
@@ -487,6 +499,63 @@ class Video(object):
             'start_date': _make_tstamp(self.start_date)}
         [data.pop(key) for key in data.keys() if data[key] == None]
         return data
+
+    def to_xml(self):
+        xml = ''
+        for asset in self.assets:
+            xml += '<asset filename="%(filename)s" refid="%(refid)s"' % asset
+            xml += ' size="%(size)s"' % asset
+            xml += ' hash-code="%s"' % asset['hash-code']
+            xml += ' type="%(type)s"' % asset
+            if asset.get('encoding-rate', None):
+                xml += ' encoding-rate="%s"' % asset['encoding-rate']
+            if asset.get('frame-width', None):
+                xml += ' frame-width="%s"' % asset['frame-width']
+            if asset.get('frame-height', None):
+                xml += ' frame-height="%s"' % asset['frame-height']
+            if asset.get('display-name', None):
+                xml += ' display-name="%s"' % asset['display-name']
+            if asset.get('encode-to', None):
+                xml += ' encode-to="%s"' % asset['encode-to']
+            if asset.get('encode-multiple', None):
+                xml += ' encode-multiple="%s"' % asset['encode-multiple']
+            if asset.get('h264-preserve-as-rendition', None):
+                xml += ' h264-preserve-as-rendition="%s"' % \
+                    asset['h264-preserve-as-rendition']
+            if asset.get('h264-no-processing', None):
+                xml += ' h264-no-processing="%s"' % asset['h264-no-processing']
+            xml += ' />\n'
+        xml += '<title name="%(name)s" refid="%(referenceId)s" active="TRUE" '
+        if self.start_date:
+            xml += 'start-date="%(start_date)s" '
+        if self.end_date:
+            xml += 'end-date="%(end_date)s" '
+        for asset in self.assets:
+            if asset.get('encoding-rate', None) == None:
+                if asset.get('type', None) == AssetTypeEnum.VIDEO_FULL:
+                    xml += 'video-full-refid="%s" ' % asset.get('refid')
+                if asset.get('type', None) == AssetTypeEnum.THUMBNAIL:
+                    xml += 'thumbnail-refid="%s" ' % asset.get('refid')
+                if asset.get('type', None) == AssetTypeEnum.VIDEO_STILL:
+                    xml += 'video-still-refid="%s" ' % asset.get('refid')
+                if asset.get('type', None) == AssetTypeEnum.FLV_BUMPER:
+                    xml += 'flash-prebumper-refid="%s" ' % asset.get('refid')
+        xml += '>\n'
+        if self.short_description:
+            xml += '<short-description><![CDATA[%(shortDescription)s]]>'
+            xml += '</short-description>\n'
+        if self.long_description:
+            xml += '<long-description><![CDATA[%(longDescription)s]]>'
+            xml += '</long-description>\n'
+        for tag in self.tags:
+            xml += '<tag><![CDATA[%s]]></tag>\n' % tag
+        for asset in self.assets:
+            if asset.get('encoding-rate', None):
+                xml += '<rendition-refid>%s</rendition-refid>\n' % \
+                    asset['refid']
+        xml += '</title>'
+        xml = xml % self._to_dict()
+        return xml
 
     def _load(self, data):
         self.raw_data = data
@@ -544,13 +613,57 @@ class Video(object):
                 raise PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
 
+    def add_asset(self, filename, asset_type, encoding_rate=None,
+        frame_width=None, frame_height=None, display_name=None,
+        encode_to=None, encode_multiple=False,
+        h264_preserve_as_rendition=False, h264_no_processing=False):
+        m = hashlib.md5()
+        fp = open(filename, 'rb')
+        bits = fp.read(262144)  ## 256KB
+        while bits:
+            m.update(bits)
+            bits = fp.read(262144)
+        fp.close()
+
+        hash_code = m.hexdigest()
+        refid = "%s-%s" % (os.path.basename(filename), hash_code)
+
+        asset = {
+            'filename': filename,
+            'type': asset_type,
+            'size': os.path.getsize(filename),
+            'refid': refid,
+            'hash-code': hash_code}
+
+        if encoding_rate:
+            asset.update({'encoding-rate': encoding_rate})
+        if frame_width:
+            asset.update({'frame-width': frame_width})
+        if frame_height:
+            asset.update({'frame-height': frame_height})
+        if display_name:
+            asset.update({'display-name': display_name})
+        if encode_to:
+            asset.update({'encode-to': encode_to})
+            asset.update({'encode-multiple': encode_multiple})
+            if encode_multiple and h264_preserve_as_rendition:
+                asset.update({
+                    'h264-preserve-as-rendition': h264_preserve_as_rendition})
+        else:
+            if h264_no_processing:
+                asset.update({'h264-no-processing': h264_no_processing})
+        self.assets.append(asset)
+
     def save(self, create_multiple_renditions=True,
         preserve_source_rendition=True,
         encode_to=EncodeToEnum.FLV):
         """
         Creates or updates the video
         """
-        if not self.id and self._filename:
+        if isinstance(self.connection, FTPConnection) and \
+            len(self.assets) > 0:
+            self.connection.post(self.to_xml(), self.assets)
+        elif not self.id and self._filename:
             self.id = self.connection.post('create_video', self._filename,
                 create_multiple_renditions=create_multiple_renditions,
                 preserve_source_rendition=preserve_source_rendition,
@@ -597,7 +710,7 @@ class Video(object):
         connection=None):
         c = connection
         if not c:
-            c = Connection()
+            c = APIConnection()
         c.post('delete_video', video_id=video_id, cascade=cascade,
             delete_shares=delete_shares)
 
@@ -605,14 +718,14 @@ class Video(object):
     def get_status(video_id, connection=None):
         c = connection
         if not c:
-            c = Connection()
+            c = APIConnection()
         return c.post('get_upload_status', video_id=video_id)
 
     @staticmethod
     def activate(video_id, connection=None):
         c = connection
         if not c:
-            c = Connection()
+            c = APIConnection()
         data = c.post('update_video', video={
             'id': video_id, 'itemState': ItemStateEnum.ACTIVE})
         return Video(data=data)

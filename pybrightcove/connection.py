@@ -18,11 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import os
 import hashlib
 import simplejson
 import urllib2
 import urllib
-import cookielib
+import tempfile
+from ftplib import FTP
 from pybrightcove import config, UserAgent
 from pybrightcove import SortByType, SortByOrderType
 from pybrightcove import BrightcoveError, NoDataFoundError
@@ -32,30 +34,102 @@ from pybrightcove.http_core import MIME_BOUNDARY
 
 class Connection(object):
 
-    def __init__(self, read_token=None, write_token=None, **kwargs):
-        if read_token:
-            self.read_token = read_token
-        elif config.has_option('Connection', 'read_token'):
-            self.read_token = config.get('Connection', 'read_token')
+    def _set(self, param, default=None, **kwargs):
+        if kwargs.get(param, None):
+            setattr(self, param, kwargs[param])
+        elif config.has_option('Connection', param):
+            setattr(self, param, config.get('Connection', param))
+        elif default:
+            setattr(self, param, default)
 
-        if write_token:
-            self.write_token = write_token
-        elif config.has_option('Connection', 'write_token'):
-            self.write_token = config.get('Connection', 'write_token')
+    def __init__(self, **kwargs):
+        # API Connection
+        self._set('read_token', **kwargs)
+        self._set('write_token', **kwargs)
+        self._set('read_url',
+            default='http://api.brightcove.com/services/library', **kwargs)
+        self._set('write_url',
+            default='http://api.brightcove.com/services/post', **kwargs)
 
-        if 'read_url' in kwargs:
-            self.read_url = kwargs['read_url']
-        elif config.has_option('Connection', 'read_url'):
-            self.read_url = config.get('Connection', 'read_url')
-        else:
-            self.read_url = 'http://api.brightcove.com/services/library'
+        # FTP Connection
+        self._set('host', default='upload.brightcove.com', **kwargs)
+        self._set('user', **kwargs)
+        self._set('password', **kwargs)
+        self._set('publisher_id', **kwargs)
+        self._set('preparer', **kwargs)
+        self._set('report_success', **kwargs)
 
-        if 'write_url' in kwargs:
-            self.write_url = kwargs['write_url']
-        elif config.has_option('Connection', 'write_url'):
-            self.write_url = config.get('Connection', 'write_url')
-        else:
-            self.write_url = 'http://api.brightcove.com/services/post'
+    def post(self, **kwargs):
+        raise Exception("Base class must implement this method.")
+
+    def get_list(self, **kwargs):
+        raise Exception("Base class must implement this method.")
+
+    def get_item(self, **kwargs):
+        raise Exception("Base class must implement this method.")
+
+
+class FTPConnection(Connection):
+
+    def __init__(self, host=None, user=None, password=None, publisher_id=None,
+        preparer=None, report_success=False):
+        super(FTPConnection, self).__init__(host=host, user=user,
+            password=password, publisher_id=publisher_id, preparer=preparer,
+            report_success=report_success)
+        self.notifications = []
+        self.callback = None
+
+    def get_manifest(self, asset_xml):
+        manifest = '<?xml version="1.0" encoding="utf-8"?>'
+        manifest += '<publisher-upload-manifest publisher-id="%s" ' % \
+            self.publisher_id
+        manifest += 'preparer="%s" ' % self.preparer
+        if self.report_success:
+            manifest += 'report-success="TRUE">\n'
+        for notify in self.notifications:
+            manifest += '<notify email="%s"/>' % notify
+        if self.callback:
+            manifest += '<callback entity-url="%s"/>' % self.callback
+        manifest += asset_xml
+        manifest += '</publisher-upload-manifest>'
+        return manifest
+
+    def _send_file(self, filename):
+        ftp = FTP(host=self.host)
+        ftp.login(user=self.user, passwd=self.password)
+        ftp.set_pasv(True)
+        print "Sending %s" % filename
+        ftp.storbinary("STOR %s" % os.path.basename(filename),
+            open(filename, 'r+b'))
+        print "Done"
+        try:
+            ftp.quit()
+            print "Quit FTP"
+        except EOFError:
+            print 'Already closed.'
+
+    def post(self, xml, assets):
+        manifest = self.get_manifest(xml)
+        fp, fname = tempfile.mkstemp(prefix="pybrightcove-manifest")
+        open(fname, 'w+b').write(manifest)
+
+        for asset in assets:
+            self._send_file(asset['filename'])
+        self._send_file(fname)
+
+    def get_list(self, **kwargs):
+        raise Exception("This method is invalid for an FTP Connection")
+
+    def get_item(self, **kwargs):
+        raise Exception("This method is invalid for an FTP Connection")
+
+
+class APIConnection(Connection):
+
+    def __init__(self, read_token=None, write_token=None, read_url=None,
+        write_url=None):
+        super(APIConnection, self).__init__(read_token=read_token,
+            write_token=write_token, read_url=read_url, write_url=write_url)
 
     def _post(self, data, file_to_upload=None):
         params = {"JSONRPC": simplejson.dumps(data)}
@@ -69,7 +143,7 @@ class Connection(object):
             req.end_of_parts()
             req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' \
                 % MIME_BOUNDARY
-            req.headers['User-Agent'] = 'pybrightcove'
+            req.headers['User-Agent'] = UserAgent
 
             req = ProxiedHttpClient().request(req)
         else:
@@ -176,7 +250,7 @@ class ItemResultSet(object):
         if connection:
             self.connection = connection
         else:
-            self.connection = Connection()
+            self.connection = APIConnection()
         self.page_size = page_size
         self.page_number = page_number
         self.sort_by = sort_by

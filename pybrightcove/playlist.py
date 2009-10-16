@@ -20,7 +20,7 @@
 
 from pybrightcove import PlaylistTypeEnum, SortByType, SortByOrderType
 from pybrightcove import Video
-from pybrightcove import Connection, ItemResultSet
+from pybrightcove import APIConnection, ItemResultSet
 from pybrightcove import PyBrightcoveError
 
 VALID_PLAYLIST_TYPES = (PlaylistTypeEnum.EXPLICIT,
@@ -86,7 +86,7 @@ class Playlist(object):
 
         self.connection = connection
         if not self.connection:
-            self.connection = Connection()
+            self.connection = APIConnection()
 
         if name and type in VALID_PLAYLIST_TYPES:
             self.name = name

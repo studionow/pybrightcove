@@ -25,11 +25,12 @@ from pybrightcove.exceptions import *
 from pybrightcove.enums import *
 
 
-Version = '0.1'
+Version = '1.1'
 UserAgent = 'PyBrightcove/%s (%s)' % (Version, sys.platform)
 config = Config()
 
 
-from pybrightcove.connection import Connection, ItemResultSet
+from pybrightcove.connection import Connection, APIConnection, FTPConnection
+from pybrightcove.connection import ItemResultSet
 from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist

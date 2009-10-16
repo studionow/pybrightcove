@@ -164,7 +164,7 @@ class VideoTest(unittest.TestCase):
         videos = Video.find_modified(since=yesterday)
         for video in videos:
             self.assertEquals(type(video), Video)
-        self.assertEquals(video.id > 0, True)
+            self.assertEquals(video.id > 0, True)
 
     def test_find_modified_filtered(self):
         yesterday = datetime.now() - timedelta(days=1)
@@ -172,7 +172,7 @@ class VideoTest(unittest.TestCase):
         videos = Video.find_modified(since=yesterday, filter_list=filters)
         for video in videos:
             self.assertEquals(type(video), Video)
-        self.assertEquals(video.id > 0, True)
+            self.assertEquals(video.id > 0, True)
 
     def test_invalid_name(self):
         try:
