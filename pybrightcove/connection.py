@@ -25,6 +25,8 @@ import urllib2
 import urllib
 import tempfile
 from ftplib import FTP
+from xml.dom import minidom
+
 from pybrightcove import config, UserAgent
 from pybrightcove import SortByType, SortByOrderType
 from pybrightcove import BrightcoveError, NoDataFoundError
@@ -98,21 +100,22 @@ class FTPConnection(Connection):
         ftp = FTP(host=self.host)
         ftp.login(user=self.user, passwd=self.password)
         ftp.set_pasv(True)
-        print "Sending %s" % filename
         ftp.storbinary("STOR %s" % os.path.basename(filename),
             open(filename, 'r+b'))
-        print "Done"
-        try:
-            ftp.quit()
-            print "Quit FTP"
-        except EOFError:
-            print 'Already closed.'
 
     def post(self, xml, assets):
+        ## Build manifest
         manifest = self.get_manifest(xml)
-        fp, fname = tempfile.mkstemp(prefix="pybrightcove-manifest")
+
+        ## Make sure it is well formed at least
+        minidom.parseString(manifest)
+
+        ## Record manifest
+        fp, fname = tempfile.mkstemp(suffix=".xml",
+            prefix="pybrightcove-manifest")
         open(fname, 'w+b').write(manifest)
 
+        ## Upload files and manifest
         for asset in assets:
             self._send_file(asset['filename'])
         self._send_file(fname)

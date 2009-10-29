@@ -19,12 +19,16 @@
 # THE SOFTWARE.
 
 import os
+import sys
 import StringIO
 import ConfigParser
 
 USER_CONFIG_PATH = os.path.expanduser('~/.pybrightcove')
 CONFIG_PATH = '/etc/pybrightcove.cfg'
 CONFIG_LOCATIONS = [CONFIG_PATH, USER_CONFIG_PATH]
+
+Version = '1.1'
+UserAgent = 'PyBrightcove/%s (%s)' % (Version, sys.platform)
 
 
 class Config(ConfigParser.SafeConfigParser):
@@ -103,3 +107,6 @@ class Config(ConfigParser.SafeConfigParser):
             self.set(section, name, 'true')
         else:
             self.set(section, name, 'false')
+
+
+config = Config()

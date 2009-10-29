@@ -31,7 +31,7 @@ from pybrightcove import FTPConnection, APIConnection, ItemResultSet
 
 def _convert_tstamp(val):
     if val:
-        return datetime.fromtimestamp(float(val)/1000)
+        return datetime.fromtimestamp(float(val) / 1000)
 
 
 def _make_tstamp(val):
@@ -257,22 +257,22 @@ class CuePoint(object):
         self._metadata = meta
 
     name = property(get_name,
-        doc = "A name for the cue point, so that you can refer to it.")
+        doc="A name for the cue point, so that you can refer to it.")
 
     video_id = property(get_video_id,
-        doc = """A comma-separated list of the ids of one or more videos
-                that this cue point applies to.""")
+        doc="""A comma-separated list of the ids of one or more videos
+               that this cue point applies to.""")
 
     time = property(get_time,
-        doc = """The time of the cue point, measured in milliseconds from
-                the beginning of the video.""")
+        doc="""The time of the cue point, measured in milliseconds from
+               the beginning of the video.""")
 
     forceStop = property(get_forceStop, set_forceStop,
-        doc = """If true, the video stops playback at the cue point. This
+        doc="""If true, the video stops playback at the cue point. This
                 setting is valid only for AD type cue points.""")
 
     cue_type = property(get_type,
-        doc = """An integer code corresponding to the type of cue point.
+        doc="""An integer code corresponding to the type of cue point.
                 One of 0 (AD), 1 (CODE), or 2 (CHAPTER). An AD cue point
                 is used to trigger mid-roll ad requests. A CHAPTER cue
                 point indicates a chapter or scene break in the video.
@@ -280,7 +280,7 @@ class CuePoint(object):
                 for and respond to.""")
 
     metadata = property(get_metadata, set_metadata,
-        doc = "A string that can be passed along with a CODE cue point.")
+        doc="A string that can be passed along with a CODE cue point.")
 
     def to_dict(self):
         data = {
@@ -459,9 +459,10 @@ class Video(object):
             else:
                 raise PyBrightcoveError('Invalid parameters for Video.')
         elif isinstance(self.connection, FTPConnection):
-            if reference_id and name:
+            if reference_id and name and short_description:
                 self.reference_id = reference_id
                 self.name = name
+                self.short_description = short_description
             else:
                 raise PyBrightcoveError("Invalid parameters for Video.")
         else:
@@ -503,7 +504,9 @@ class Video(object):
     def to_xml(self):
         xml = ''
         for asset in self.assets:
-            xml += '<asset filename="%(filename)s" refid="%(refid)s"' % asset
+            xml += '<asset filename="%s" ' % \
+                os.path.basename(asset['filename'])
+            xml += ' refid="%(refid)s"' % asset
             xml += ' size="%(size)s"' % asset
             xml += ' hash-code="%s"' % asset['hash-code']
             xml += ' type="%(type)s"' % asset
@@ -613,8 +616,8 @@ class Video(object):
                 raise PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
 
-    def add_asset(self, filename, asset_type, encoding_rate=None,
-        frame_width=None, frame_height=None, display_name=None,
+    def add_asset(self, filename, asset_type, display_name,
+        encoding_rate=None, frame_width=None, frame_height=None,
         encode_to=None, encode_multiple=False,
         h264_preserve_as_rendition=False, h264_no_processing=False):
         m = hashlib.md5()

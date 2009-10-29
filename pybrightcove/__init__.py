@@ -18,18 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import sys
-
-from pybrightcove.config import Config
+from pybrightcove.config import config, Version, UserAgent
 from pybrightcove.exceptions import *
 from pybrightcove.enums import *
-
-
-Version = '1.1'
-UserAgent = 'PyBrightcove/%s (%s)' % (Version, sys.platform)
-config = Config()
-
-
 from pybrightcove.connection import Connection, APIConnection, FTPConnection
 from pybrightcove.connection import ItemResultSet
 from pybrightcove.video import Video, Image
