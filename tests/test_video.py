@@ -21,13 +21,12 @@
 """
 Test the Video object.
 """
-
 import unittest
 import uuid
 from datetime import datetime, timedelta
 from pybrightcove import PyBrightcoveError
 from pybrightcove import Video, Image
-from pybrightcove import UploadStatusEnum, ImageTypeEnum, FilterChoicesEnum
+from pybrightcove import enums
 
 ## NOTE: This are ids private to my account, if you want to run these tests
 ##       for yourself and have them pass, replace these with your own values.
@@ -94,7 +93,7 @@ class VideoTest(unittest.TestCase):
         video.tags.append('unittest')
         video.save()
         status = video.get_upload_status()
-        self.assertEquals(status, UploadStatusEnum.PROCESSING)
+        self.assertEquals(status, enums.UploadStatusEnum.PROCESSING)
 
     def test_delete(self):
         video = Video(filename='bears.mov', name='DELETE TEST The Bears',
@@ -109,7 +108,7 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(video.image, None)
         image = Image(reference_id="img-%s" % self.test_uuid,
                       display_name="My Test Image",
-                      type=ImageTypeEnum.VIDEO_STILL)
+                      type=enums.ImageTypeEnum.VIDEO_STILL)
         video.set_image(image, filename='IMG_0050.JPG')
         self.assertEquals(video.image != None, True)
         self.assertEquals(video.image.id > 0, True)
@@ -168,7 +167,8 @@ class VideoTest(unittest.TestCase):
 
     def test_find_modified_filtered(self):
         yesterday = datetime.now() - timedelta(days=1)
-        filters = [FilterChoicesEnum.PLAYABLE, FilterChoicesEnum.DELETED]
+        filters = [enums.FilterChoicesEnum.PLAYABLE,
+            enums.FilterChoicesEnum.DELETED]
         videos = Video.find_modified(since=yesterday, filter_list=filters)
         for video in videos:
             self.assertEquals(type(video), Video)

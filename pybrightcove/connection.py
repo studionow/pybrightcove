@@ -24,7 +24,7 @@ import simplejson
 import urllib2
 import urllib
 import tempfile
-from ftplib import FTP
+import ftplib
 from xml.dom import minidom
 
 from pybrightcove import config, UserAgent
@@ -97,11 +97,11 @@ class FTPConnection(Connection):
         return manifest
 
     def _send_file(self, filename):
-        ftp = FTP(host=self.host)
+        ftp = ftplib.FTP(host=self.host)
         ftp.login(user=self.user, passwd=self.password)
         ftp.set_pasv(True)
         ftp.storbinary("STOR %s" % os.path.basename(filename),
-            open(filename, 'r+b'))
+            file(filename, 'rb'))
 
     def post(self, xml, assets):
         ## Build manifest
@@ -113,7 +113,7 @@ class FTPConnection(Connection):
         ## Record manifest
         fp, fname = tempfile.mkstemp(suffix=".xml",
             prefix="pybrightcove-manifest")
-        open(fname, 'w+b').write(manifest)
+        file(fname, 'wb').write(manifest)
 
         ## Upload files and manifest
         for asset in assets:
@@ -141,7 +141,7 @@ class APIConnection(Connection):
             req = HttpRequest(self.write_url)
             req.method = 'POST'
             req.add_body_part("JSONRPC", simplejson.dumps(data), 'text/plain')
-            req.add_body_part("filePath", open(file_to_upload, "rb"),
+            req.add_body_part("filePath", file(file_to_upload, "rb"),
                 'application/octet-stream')
             req.end_of_parts()
             req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' \
@@ -183,7 +183,7 @@ class APIConnection(Connection):
                 params[key] = kwargs[key]
         if file_to_upload:
             m = hashlib.md5()
-            fp = open(file_to_upload, 'rb')
+            fp = file(file_to_upload, 'rb')
             bits = fp.read(262144)  ## 256KB
             while bits:
                 m.update(bits)

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<publisher-upload-manifest publisher-id="111111111" preparer="Patrick" report-success="TRUE">
+	<asset filename="1500.flv" refid="1500.flv-a78fa9f8asd" size="10000" hash-code="a78fa9f8asd" type="VIDEO_FULL" encoding-rate="1500000" frame-width="640" frame-height="360" display-name="High quality rendition"/>
+	<asset filename="700.flv" refid="700.flv-a78fa9f8asd" size="10000" hash-code="a78fa9f8asd" type="VIDEO_FULL" encoding-rate="700000" frame-width="640" frame-height="360" display-name="Medium quality rendition"/>
+	<asset filename="poster.png" refid="poster.png-a78fa9f8asd" size="10000" hash-code="a78fa9f8asd" type="VIDEO_STILL" frame-width="640" frame-height="360" display-name="Poster frame"/>
+	<title name="Some title" refid="a532kallk3252a" active="TRUE" video-still-refid="poster.png-a78fa9f8asd">
+		<short-description><![CDATA[A short description.]]></short-description>
+		<long-description><![CDATA[An even longer description]]></long-description>
+		<tag><![CDATA[blah]]></tag>
+		<tag><![CDATA[nah]]></tag>
+		<tag><![CDATA[tag]]></tag>
+		<rendition-refid>1500.flv-a78fa9f8asd</rendition-refid>
+		<rendition-refid>700.flv-a78fa9f8asd</rendition-refid>
+	</title>
+</publisher-upload-manifest>

@@ -621,7 +621,7 @@ class Video(object):
         encode_to=None, encode_multiple=False,
         h264_preserve_as_rendition=False, h264_no_processing=False):
         m = hashlib.md5()
-        fp = open(filename, 'rb')
+        fp = file(filename, 'rb')
         bits = fp.read(262144)  ## 256KB
         while bits:
             m.update(bits)
