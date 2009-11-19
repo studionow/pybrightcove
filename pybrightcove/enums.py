@@ -160,3 +160,8 @@ class AssetTypeEnum(object):
     LOGO = "LOGO"
     LOGO_OVERLAY = "LOGO_OVERLAY"
     OTHER_IMAGE = "OTHER_IMAGE"
+
+
+class CustomMetaType(object):
+    ENUM = 'enum'
+    STRING = 'string'

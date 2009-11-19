@@ -24,7 +24,7 @@ import hashlib
 from datetime import datetime
 from pybrightcove import PyBrightcoveError
 from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
-from pybrightcove import FilterChoicesEnum, AssetTypeEnum
+from pybrightcove import FilterChoicesEnum, AssetTypeEnum, CustomMetaType
 from pybrightcove import VideoCodecEnum, ItemStateEnum, EncodeToEnum
 from pybrightcove import FTPConnection, APIConnection, ItemResultSet
 
@@ -417,6 +417,7 @@ class Video(object):
         self.flv_url = None
         self.renditions = []
         self.assets = []
+        self.metadata = []
         self.video_full_length = None
         self.creation_date = None
         self.published_date = None
@@ -556,6 +557,10 @@ class Video(object):
             if asset.get('encoding-rate', None):
                 xml += '<rendition-refid>%s</rendition-refid>\n' % \
                     asset['refid']
+        for meta in self.metadata:
+            # <custom-string-value name="key_one">String Value One</custom-string-value>
+            xml += '<custom-%s-value name="%s">%s</custom-%s-value>' % \
+                (meta['type'], meta['key'], meta['value'], meta['type'])
         xml += '</title>'
         xml = xml % self._to_dict()
         return xml
@@ -615,6 +620,9 @@ class Video(object):
             if msg:
                 raise PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
+
+    def add_custom_metadata(self, key, value, meta_type):
+        self.metadata.append({'key': key, 'value': value, 'type': meta_type})
 
     def add_asset(self, filename, asset_type, display_name,
         encoding_rate=None, frame_width=None, frame_height=None,
