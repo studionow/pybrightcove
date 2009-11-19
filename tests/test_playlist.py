@@ -25,8 +25,9 @@ Test the Playlist object
 import unittest
 import uuid
 from pybrightcove import Playlist, PlaylistTypeEnum, Video, PyBrightcoveError
-from pybrightcove.tests.video import TEST_VIDEO_IDS
 
+TEST_VIDEO_ID = 11449913001
+TEST_VIDEO_IDS = [TEST_VIDEO_ID, 24780403001, 24780402001]
 TEST_PLAYLIST_ID = 24781161001
 TEST_PLAYLIST_IDS = [TEST_PLAYLIST_ID, 10518202001]
 TEST_PLAYLIST_REF_ID = 'unittest-playlist'

@@ -17,20 +17,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""
-Execute all the unit tests.
-"""
-
-import unittest
-
-from pybrightcove.tests.video import VideoTest
-from pybrightcove.tests.playlist import PlaylistTest
-
-suite = unittest.TestSuite()
-suite.addTest(unittest.makeSuite(VideoTest))
-suite.addTest(unittest.makeSuite(PlaylistTest))
-
-unittest.TextTestRunner(verbosity=2).run(suite)
+# """
+# Execute all the unit tests.
+# """
+# 
+# import unittest
+# 
+# from pybrightcove.tests.video import VideoTest
+# from pybrightcove.tests.playlist import PlaylistTest
+# 
+# suite = unittest.TestSuite()
+# suite.addTest(unittest.makeSuite(VideoTest))
+# suite.addTest(unittest.makeSuite(PlaylistTest))
+# 
+# unittest.TextTestRunner(verbosity=2).run(suite)
 
 
 
