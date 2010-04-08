@@ -2,20 +2,15 @@ from setuptools import setup, find_packages
 
 setup(
     name='pybrightcove',
-    version = '',
-    author='',
-    author_email='',
+    version = '1.2',
+    author='Patrick Altman',
+    author_email='patrick@studionow.com',
     url='git://github.com/studionow/pybrightcove.git',
-    description="""\
-""",
+    description="""A Python interface for the Brightcove APIs""",
     packages=find_packages(),
     namespace_packages = [],
     include_package_data = True,
     zip_safe=False,
-    license='',
-    install_requires=[
-        'simplejson',
-        'setuptools'
-        ]
+    license='MIT'
 )
 

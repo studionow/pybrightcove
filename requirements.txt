@@ -1,0 +1,4 @@
+simplejson
+
+# Required to run tests
+nose
