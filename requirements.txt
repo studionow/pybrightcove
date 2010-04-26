@@ -2,3 +2,4 @@ simplejson
 
 # Required to run tests
 nose
+mock

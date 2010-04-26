@@ -18,10 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pybrightcove.config import config, Version, UserAgent
+from pybrightcove.config import Version, UserAgent
 from pybrightcove.exceptions import *
 from pybrightcove.enums import *
 from pybrightcove.connection import Connection, APIConnection, FTPConnection
 from pybrightcove.connection import ItemResultSet
 from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist
+

@@ -18,18 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pybrightcove import PlaylistTypeEnum, SortByType, SortByOrderType
-from pybrightcove import Video
-from pybrightcove import APIConnection, ItemResultSet
-from pybrightcove import PyBrightcoveError
+import pybrightcove
+from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
+#from pybrightcove import PlaylistTypeEnum, SortByType, SortByOrderType
+#from pybrightcove import Video
+#from pybrightcove import APIConnection, ItemResultSet
+#from pybrightcove import PyBrightcoveError
 
-VALID_PLAYLIST_TYPES = (PlaylistTypeEnum.EXPLICIT,
-                        PlaylistTypeEnum.OLDEST_TO_NEWEST,
-                        PlaylistTypeEnum.NEWEST_TO_OLDEST,
-                        PlaylistTypeEnum.ALPHABETICAL,
-                        PlaylistTypeEnum.PLAYS_TOTAL,
-                        PlaylistTypeEnum.PLAYS_TRAILING_WEEK)
-
+VALID_PLAYLIST_TYPES = (pybrightcove.enums.PlaylistTypeEnum.EXPLICIT,
+                        pybrightcove.enums.PlaylistTypeEnum.OLDEST_TO_NEWEST,
+                        pybrightcove.enums.PlaylistTypeEnum.NEWEST_TO_OLDEST,
+                        pybrightcove.enums.PlaylistTypeEnum.ALPHABETICAL,
+                        pybrightcove.enums.PlaylistTypeEnum.PLAYS_TOTAL,
+                        pybrightcove.enums.PlaylistTypeEnum.PLAYS_TRAILING_WEEK)
+                        
 
 class Playlist(object):
     """
@@ -86,7 +88,7 @@ class Playlist(object):
 
         self.connection = connection
         if not self.connection:
-            self.connection = APIConnection()
+            self.connection = pybrightcove.connection.APIConnection()
 
         if name and type in VALID_PLAYLIST_TYPES:
             self.name = name
@@ -98,7 +100,7 @@ class Playlist(object):
         elif data:
             self._load(data)
         else:
-            raise PyBrightcoveError('Invalid parameters for Video.')
+            raise pybrightcove.exceptions.PyBrightcoveError('Invalid parameters for Video.')
 
     def __setattr__(self, name, value):
         msg = None
@@ -115,7 +117,7 @@ class Playlist(object):
             if name == 'type' and value not in VALID_PLAYLIST_TYPES:
                 msg = "Playlist.type must be a valid PlaylistTypeEnum"
             if msg:
-                raise PyBrightcoveError(msg)
+                raise pybrightcove.exceptions.PyBrightcoveError(msg)
         return super(Playlist, self).__setattr__(name, value)
 
     def _find_playlist(self):
@@ -179,30 +181,28 @@ class Playlist(object):
 
     @staticmethod
     def find_all(connection=None, page_size=100, page_number=0,
-        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
-        return ItemResultSet('find_all_playlists', Playlist, connection,
+        sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        return pybrightcove.connection.ItemResultSet('find_all_playlists', Playlist, connection,
             page_size, page_number, sort_by, sort_order)
 
     @staticmethod
     def find_by_ids(ids, connection=None, page_size=100, page_number=0,
-        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         ids = ','.join([str(i) for i in ids])
-        return ItemResultSet('find_playlists_by_ids', Playlist, connection,
+        return pybrightcove.connection.ItemResultSet('find_playlists_by_ids', Playlist, connection,
             page_size, page_number, sort_by, sort_order, playlist_ids=ids)
 
     @staticmethod
     def find_by_reference_ids(reference_ids, connection=None, page_size=100,
-        page_number=0, sort_by=SortByType.CREATION_DATE,
-        sort_order=SortByOrderType.ASC):
+        page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         reference_ids = ','.join([str(i) for i in reference_ids])
-        return ItemResultSet('find_playlists_by_reference_ids', Playlist,
+        return pybrightcove.connection.ItemResultSet('find_playlists_by_reference_ids', Playlist,
             connection, page_size, page_number, sort_by, sort_order,
             reference_ids=reference_ids)
 
     @staticmethod
     def find_for_player_id(player_id, connection=None, page_size=100,
-        page_number=0, sort_by=SortByType.CREATION_DATE,
-        sort_order=SortByOrderType.ASC):
-        return ItemResultSet('find_playlists_for_player_id', Playlist,
+        page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        return pybrightcove.connection.ItemResultSet('find_playlists_for_player_id', Playlist,
             connection, page_size, page_number, sort_by, sort_order,
             player_id=player_id)

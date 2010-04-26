@@ -165,3 +165,7 @@ class AssetTypeEnum(object):
 class CustomMetaType(object):
     ENUM = 'enum'
     STRING = 'string'
+
+
+DEFAULT_SORT_BY = SortByType.CREATION_DATE
+DEFAULT_SORT_ORDER = SortByOrderType.ASC

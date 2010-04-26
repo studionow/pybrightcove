@@ -26,12 +26,8 @@ import urllib
 import tempfile
 import ftplib
 from xml.dom import minidom
-
-from pybrightcove import config, UserAgent
-from pybrightcove import SortByType, SortByOrderType
-from pybrightcove import BrightcoveError, NoDataFoundError
-from pybrightcove.http_core import HttpRequest, ProxiedHttpClient
-from pybrightcove.http_core import MIME_BOUNDARY
+import pybrightcove
+from pybrightcove import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
 
 
 class Connection(object):
@@ -39,8 +35,8 @@ class Connection(object):
     def _set(self, param, default=None, **kwargs):
         if kwargs.get(param, None):
             setattr(self, param, kwargs[param])
-        elif config.has_option('Connection', param):
-            setattr(self, param, config.get('Connection', param))
+        elif pybrightcove.config.config.has_option('Connection', param):
+            setattr(self, param, pybrightcove.config.config.get('Connection', param))
         elif default:
             setattr(self, param, default)
 
@@ -138,17 +134,17 @@ class APIConnection(Connection):
         params = {"JSONRPC": simplejson.dumps(data)}
         req = None
         if file_to_upload:
-            req = HttpRequest(self.write_url)
+            req = pybrightcove.http_core.HttpRequest(self.write_url)
             req.method = 'POST'
             req.add_body_part("JSONRPC", simplejson.dumps(data), 'text/plain')
             req.add_body_part("filePath", file(file_to_upload, "rb"),
                 'application/octet-stream')
             req.end_of_parts()
             req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' \
-                % MIME_BOUNDARY
-            req.headers['User-Agent'] = UserAgent
+                % pybrightcove.http_core.MIME_BOUNDARY
+            req.headers['User-Agent'] = pybrightcove.config.UserAgent
 
-            req = ProxiedHttpClient().request(req)
+            req = pybrightcove.http_core.ProxiedHttpClient().request(req)
         else:
             msg = urllib.urlencode({'json': params['JSONRPC']})
             req = urllib2.urlopen(self.write_url, msg)
@@ -156,7 +152,7 @@ class APIConnection(Connection):
         if req:
             result = simplejson.loads(req.read())
             if 'error' in result and result['error']:
-                BrightcoveError.raise_exception(result['error'])
+                pybrightcove.exceptions.BrightcoveError.raise_exception(result['error'])
             return result['result']
 
     def _get_response(self, **kwargs):
@@ -170,9 +166,9 @@ class APIConnection(Connection):
         req = urllib2.urlopen(url)
         data = simplejson.loads(req.read())
         if data and data.get('error', None):
-            BrightcoveError.raise_exception(data['error'])
+            pybrightcove.exceptions.BrightcoveError.raise_exception(data['error'])
         if data == None:
-            raise NoDataFoundError("No data found for %s" % repr(kwargs))
+            raise pybrightcove.exceptions.NoDataFoundError("No data found for %s" % repr(kwargs))
         return data
 
     def post(self, command, file_to_upload=None, **kwargs):
@@ -224,6 +220,7 @@ def item_lister(command, connection, page_size, page_number, sort_by,
     """
     page = page_number
     while True:
+        print ">>>", connection
         itemCollection = connection.get_list(command,
                                              page_size=page_size,
                                              page_number=page,
@@ -247,8 +244,7 @@ def item_lister(command, connection, page_size, page_number, sort_by,
 class ItemResultSet(object):
 
     def __init__(self, command, item_class, connection=None, page_size=100,
-            page_number=0, sort_by=SortByType.CREATION_DATE,
-            sort_order=SortByOrderType.ASC, **kwargs):
+            page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER, **kwargs):
         self.command = command
         if connection:
             self.connection = connection

@@ -22,12 +22,12 @@ import os
 import time
 import hashlib
 from datetime import datetime
-from pybrightcove import PyBrightcoveError
-from pybrightcove import SortByType, EconomicsEnum, SortByOrderType
-from pybrightcove import FilterChoicesEnum, AssetTypeEnum, CustomMetaType
-from pybrightcove import VideoCodecEnum, ItemStateEnum, EncodeToEnum
-from pybrightcove import FTPConnection, APIConnection, ItemResultSet
+import pybrightcove
+from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
 
+
+def is_ftp_connection(connection):
+    return isinstance(connection, pybrightcove.connection.FTPConnection)
 
 def _convert_tstamp(val):
     if val:
@@ -72,7 +72,7 @@ class Image(object):
             'referenceId': self.reference_id,
             'type': self.type,
             'displayName': self.display_name,
-            'remoateUrl': self.remote_url}
+            'remoteUrl': self.remote_url}
         for key in data.keys():
             if data[key] == None:
                 data.pop(key)
@@ -444,9 +444,16 @@ class Video(object):
 
         self.connection = connection
         if not self.connection:
-            self.connection = APIConnection()
+            self.connection = pybrightcove.connection.APIConnection()
 
-        if isinstance(self.connection, APIConnection):
+        if is_ftp_connection(self.connection):
+            if reference_id and name and short_description:
+                self.reference_id = reference_id
+                self.name = name
+                self.short_description = short_description
+            else:
+                raise pybrightcove.exceptions.PyBrightcoveError("Invalid parameters for Video.")
+        else:
             if filename and name and short_description:
                 self._filename = filename
                 self.name = name
@@ -458,16 +465,7 @@ class Video(object):
             elif data:
                 self._load(data)
             else:
-                raise PyBrightcoveError('Invalid parameters for Video.')
-        elif isinstance(self.connection, FTPConnection):
-            if reference_id and name and short_description:
-                self.reference_id = reference_id
-                self.name = name
-                self.short_description = short_description
-            else:
-                raise PyBrightcoveError("Invalid parameters for Video.")
-        else:
-            raise PyBrightcoveError("Invalid connection type for Video.")
+                raise pybrightcove.exceptions.PyBrightcoveError('Invalid parameters for Video.')
 
     def _find_video(self):
         data = None
@@ -536,13 +534,13 @@ class Video(object):
             xml += 'end-date="%(end_date)s" '
         for asset in self.assets:
             if asset.get('encoding-rate', None) == None:
-                if asset.get('type', None) == AssetTypeEnum.VIDEO_FULL:
+                if asset.get('type', None) == pybrightcove.enums.AssetTypeEnum.VIDEO_FULL:
                     xml += 'video-full-refid="%s" ' % asset.get('refid')
-                if asset.get('type', None) == AssetTypeEnum.THUMBNAIL:
+                if asset.get('type', None) == pybrightcove.enums.AssetTypeEnum.THUMBNAIL:
                     xml += 'thumbnail-refid="%s" ' % asset.get('refid')
-                if asset.get('type', None) == AssetTypeEnum.VIDEO_STILL:
+                if asset.get('type', None) == pybrightcove.enums.AssetTypeEnum.VIDEO_STILL:
                     xml += 'video-still-refid="%s" ' % asset.get('refid')
-                if asset.get('type', None) == AssetTypeEnum.FLV_BUMPER:
+                if asset.get('type', None) == pybrightcove.enums.AssetTypeEnum.FLV_BUMPER:
                     xml += 'flash-prebumper-refid="%s" ' % asset.get('refid')
         xml += '>\n'
         if self.short_description:
@@ -604,21 +602,21 @@ class Video(object):
             if name == 'short_description' and len(value) > 250:
                 # val = value[:250]
                 msg = "Video.short_description must be 250 characters or less."
-            if name == 'item_state' and value not in (ItemStateEnum.ACTIVE,
-                                                      ItemStateEnum.INACTIVE):
+            if name == 'item_state' and value not in (pybrightcove.enums.ItemStateEnum.ACTIVE,
+                                                      pybrightcove.enums.ItemStateEnum.INACTIVE):
                 msg = "Video.item_state must be either ItemStateEnum.ACTIVE or"
                 msg += " ItemStateEnum.INACTIVE"
             if name == 'video_full_length' and \
                     not isinstance(value, Rendition):
                 msg = "Video.video_full_length must be of type Rendition"
             if name == 'economics' and \
-                    value not in (EconomicsEnum.FREE,
-                                  EconomicsEnum.AD_SUPPORTED):
+                    value not in (pybrightcove.enums.EconomicsEnum.FREE,
+                                  pybrightcove.enums.EconomicsEnum.AD_SUPPORTED):
                 msg = "Video.economics must be either EconomicsEnum.FREE or "
                 msg += "EconomicsEnum.AD_SUPPORTED"
 
             if msg:
-                raise PyBrightcoveError(msg)
+                raise pybrightcove.exceptions.PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
 
     def add_custom_metadata(self, key, value, meta_type):
@@ -667,12 +665,11 @@ class Video(object):
 
     def save(self, create_multiple_renditions=True,
         preserve_source_rendition=True,
-        encode_to=EncodeToEnum.FLV):
+        encode_to=pybrightcove.enums.EncodeToEnum.FLV):
         """
         Creates or updates the video
         """
-        if isinstance(self.connection, FTPConnection) and \
-            len(self.assets) > 0:
+        if is_ftp_connection(self.connection) and len(self.assets) > 0:
             self.connection.post(self.to_xml(), self.assets)
         elif not self.id and self._filename:
             self.id = self.connection.post('create_video', self._filename,
@@ -697,8 +694,8 @@ class Video(object):
 
     def share(self, accounts):
         if not isinstance(accounts, (list, tuple)):
-            raise PyBrightcoveError("Video.share expects an iterable argument")
-        raise PyBrightcoveError("Not yet implemented")
+            raise pybrightcove.exceptions.PyBrightcoveError("Video.share expects an iterable argument")
+        raise pybrightcove.exceptions.PyBrightcoveError("Not yet implemented")
 
     def set_image(self, image, filename=None, resize=True):
         if self.id:
@@ -709,11 +706,11 @@ class Video(object):
 
     def find_related(self, connection=None, page_size=100, page_number=0):
         if self.id:
-            return ItemResultSet('find_related_videos', Video, connection,
+            return pybrightcove.connection.ItemResultSet('find_related_videos', Video, connection,
                 page_size, page_number, None, None, video_id=self.id)
 
     def deactivate(self):
-        self.item_state = ItemStateEnum.INACTIVE
+        self.item_state = pybrightcove.enums.ItemStateEnum.INACTIVE
         self.save()
 
     @staticmethod
@@ -721,7 +718,7 @@ class Video(object):
         connection=None):
         c = connection
         if not c:
-            c = APIConnection()
+            c = pybrightcove.connection.APIConnection()
         c.post('delete_video', video_id=video_id, cascade=cascade,
             delete_shares=delete_shares)
 
@@ -729,41 +726,39 @@ class Video(object):
     def get_status(video_id, connection=None):
         c = connection
         if not c:
-            c = APIConnection()
+            c = pybrightcove.connection.APIConnection()
         return c.post('get_upload_status', video_id=video_id)
 
     @staticmethod
     def activate(video_id, connection=None):
         c = connection
         if not c:
-            c = APIConnection()
+            c = pybrightcove.connection.APIConnection()
         data = c.post('update_video', video={
             'id': video_id, 'itemState': ItemStateEnum.ACTIVE})
         return Video(data=data)
 
     @staticmethod
     def find_modified(since, filter_list=[], connection=None, page_size=25,
-        page_number=0, sort_by=SortByType.CREATION_DATE,
-        sort_order=SortByOrderType.ASC):
+        page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         if not isinstance(since, datetime):
             msg = 'The parameter "since" must be a datetime object.'
-            raise PyBrightcoveError(msg)
-        filters = None
+            raise pybrightcove.exceptions.PyBrightcoveError(msg)
+        filters = filter_list
         fdate = int(since.strftime("%s")) / 60  ## Minutes since UNIX time
-        return ItemResultSet('find_modified_videos', Video, connection,
+        return pybrightcove.connection.ItemResultSet('find_modified_videos', Video, connection,
             page_size, page_number, sort_by, sort_order, from_date=fdate,
             filter=filters)
 
     @staticmethod
     def find_all(connection=None, page_size=100, page_number=0,
-        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
-        return ItemResultSet('find_all_videos', Video, connection, page_size,
+        sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        return pybrightcove.connection.ItemResultSet('find_all_videos', Video, connection, page_size,
             page_number, sort_by, sort_order)
 
     @staticmethod
     def find_by_tags(and_tags=None, or_tags=None, connection=None,
-        page_size=100, page_number=0, sort_by=SortByType.MODIFIED_DATE,
-        sort_order=SortByOrderType.ASC):
+        page_size=100, page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         err = None
         if not and_tags and not or_tags:
             err = "You must supply at least one of either and_tags or or_tags."
@@ -774,61 +769,59 @@ class Video(object):
             err = "The or_tags argument for Video.find_by_tags must an "
             err += "iterable"
         if err:
-            raise PyBrightcoveError(err)
+            raise pybrightcove.exceptions.PyBrightcoveError(err)
         atags = None
         otags = None
         if and_tags:
             atags = ','.join([str(t) for t in and_tags])
         if or_tags:
             otags = ','.join([str(t) for t in or_tags])
-        return ItemResultSet('find_videos_by_tags', Video, connection,
+        return pybrightcove.connection.ItemResultSet('find_videos_by_tags', Video, connection,
             page_size, page_number, sort_by, sort_order, and_tags=atags,
             or_tags=otags)
 
     @staticmethod
     def find_by_text(text, connection=None, page_size=100, page_number=0,
-        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
-        return ItemResultSet('find_videos_by_text', Video, connection,
+        sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        return pybrightcove.connection.ItemResultSet('find_videos_by_text', Video, connection,
             page_size, page_number, sort_by, sort_order, text=text)
 
     @staticmethod
     def find_by_campaign(campaign_id, connection=None, page_size=100,
-        page_number=0, sort_by=SortByType.CREATION_DATE,
-        sort_order=SortByOrderType.ASC):
-        return ItemResultSet('find_videos_by_campaign_id', Video, connection,
+        page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        return pybrightcove.connection.ItemResultSet('find_videos_by_campaign_id', Video, connection,
             page_size, page_number, sort_by, sort_order,
             campaign_id=campaign_id)
 
     @staticmethod
     def find_by_user(user_id, connection=None, page_size=100, page_number=0,
-        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
-        return ItemResultSet('find_videos_by_user_id', Video, connection,
+        sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        return pybrightcove.connection.ItemResultSet('find_videos_by_user_id', Video, connection,
             page_size, page_number, sort_by, sort_order, user_id=user_id)
 
     @staticmethod
     def find_by_reference_ids(reference_ids, connection=None, page_size=100,
-        page_number=0, sort_by=SortByType.CREATION_DATE,
-        sort_order=SortByOrderType.ASC):
+        page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         if not isinstance(reference_ids, (list, tuple)):
             err = "Video.find_by_reference_ids expects an iterable argument"
-            raise PyBrightcoveError(err)
+            raise pybrightcove.exceptions.PyBrightcoveError(err)
         ids = ','.join(reference_ids)
-        return ItemResultSet('find_videos_by_reference_ids', Video, connection,
+        return pybrightcove.connection.ItemResultSet('find_videos_by_reference_ids', Video, connection,
             page_size, page_number, sort_by, sort_order, reference_ids=ids)
 
     @staticmethod
     def find_by_ids(ids, connection=None, page_size=100, page_number=0,
-        sort_by=SortByType.CREATION_DATE, sort_order=SortByOrderType.ASC):
+        sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         if not isinstance(ids, (list, tuple)):
             err = "Video.find_by_ids expects an iterable argument"
-            raise PyBrightcoveError(err)
+            raise pybrightcove.exceptions.PyBrightcoveError(err)
         ids = ','.join([str(i) for i in ids])
-        return ItemResultSet('find_videos_by_ids', Video, connection,
+        return pybrightcove.connection.ItemResultSet('find_videos_by_ids', Video, connection,
             page_size, page_number, sort_by, sort_order, video_ids=ids)
 
     @staticmethod
     def delete_by_id(id, connection=None, cascade=False, delete_shares=False):
         if connection is None:
-            connection=Connection()
+            connection=pybrightcove.connection.APIConnection()
         connection.post('delete_video', video_id=id,
             cascade=cascade, delete_shares=delete_shares)
