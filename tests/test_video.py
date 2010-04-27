@@ -238,6 +238,27 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(m.method_calls[2][2]['image']['remoteUrl'], 'http://my.sample.com/image-2.jpg')
 
     @mock.patch('pybrightcove.connection.APIConnection')
+    def test_save_new_with_metadata(self, ConnectionMock):
+        m = ConnectionMock()
+        m.post.return_value = TEST_VIDEO_ID
+        video = pybrightcove.video.Video(filename='bears.mov', name='The Bears',
+            short_description='Opening roll for an exciting soccer match.')
+        video.tags.append('unittest')
+        self.assertEquals(video.id, None)
+        video.add_custom_metadata('genre', 'Sci-Fi', 'string')
+        video.add_custom_metadata('rating', 'PG-13', 'string')
+        video.save()
+        self.assertEquals(video.id, TEST_VIDEO_ID)
+        self.assertEquals(m.method_calls[0][0], 'post')
+        self.assertEquals(m.method_calls[0][1][0], 'create_video')
+        self.assertTrue('unittest' in m.method_calls[0][2]['video']['tags'])
+        self.assertTrue('customFields' in m.method_calls[0][2]['video'])
+        self.assertTrue('genre' in m.method_calls[0][2]['video']['customFields'])
+        self.assertTrue('rating' in m.method_calls[0][2]['video']['customFields'])
+        self.assertEquals(m.method_calls[0][2]['video']['customFields']['genre'], 'Sci-Fi')
+        self.assertEquals(m.method_calls[0][2]['video']['customFields']['rating'], 'PG-13')
+
+    @mock.patch('pybrightcove.connection.APIConnection')
     def test_save_update(self, ConnectionMock):
         m = ConnectionMock()
         m.post.return_value = VIDEO_DATA
@@ -255,6 +276,33 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(m.method_calls[1][1][0], 'update_video')
         self.assertTrue('unittest' in m.method_calls[1][2]['video']['tags'])
         self.assertTrue('tag-%s' % self.test_uuid in m.method_calls[1][2]['video']['tags'])
+
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_save_update_with_metadata(self, ConnectionMock):
+        m = ConnectionMock()
+        m.post.return_value = VIDEO_DATA
+        m.get_item.return_value = VIDEO_DATA
+        video = pybrightcove.video.Video(id=TEST_VIDEO_ID)
+        video.tags.append('tag-%s' % self.test_uuid)
+        video.tags.append('unittest')
+        video.add_custom_metadata('genre', 'Sci-Fi', 'string')
+        video.add_custom_metadata('rating', 'PG-13', 'string')
+        lmd = video.last_modified_date
+        self.assertEquals(video.id, TEST_VIDEO_ID)
+        video.save()
+        self.assertEquals(video.id, TEST_VIDEO_ID)
+        self.assertEquals(video.reference_id, TEST_VIDEO_REF_ID)
+        self.assertEquals(m.method_calls[0][0], 'get_item')
+        self.assertEquals(m.method_calls[1][0], 'post')
+        self.assertEquals(m.method_calls[1][1][0], 'update_video')
+        self.assertTrue('unittest' in m.method_calls[1][2]['video']['tags'])
+        self.assertTrue('tag-%s' % self.test_uuid in m.method_calls[1][2]['video']['tags'])
+        self.assertTrue('customFields' in m.method_calls[1][2]['video'])
+        self.assertTrue('genre' in m.method_calls[1][2]['video']['customFields'])
+        self.assertTrue('rating' in m.method_calls[1][2]['video']['customFields'])
+        self.assertEquals(m.method_calls[1][2]['video']['customFields']['genre'], 'Sci-Fi')
+        self.assertEquals(m.method_calls[1][2]['video']['customFields']['rating'], 'PG-13')
+
 
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_get_upload_status(self, ConnectionMock):

@@ -445,6 +445,10 @@ class Video(object):
             data['renditions'] = []
             for r in self.renditions:
                 data['renditions'].append(r.to_dict())
+        if len(self.metadata) > 0:
+            data['customFields'] = {}
+            for meta in self.metadata:
+                data['customFields'][meta['key']] = meta['value']
         [data.pop(key) for key in data.keys() if data[key] == None]
         return data
 
