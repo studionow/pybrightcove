@@ -215,12 +215,27 @@ class VideoTest(unittest.TestCase):
         
         self.assertEquals(video.id, None)
         video.save()
+        m.post.return_value = {'id': 123456, 'referenceId': 777777, 'type': 'VIDEO_STILL', 'remoteUrl': 'http://my.sample.com/image-2', 'displayName': None}
+        i = pybrightcove.video.Image()
+        i.type = pybrightcove.enums.ImageTypeEnum.THUMBNAIL
+        i.remote_url = 'http://my.sample.com/image-1.jpg'
+        video.set_image(i)
+        i = pybrightcove.video.Image()
+        i.type = pybrightcove.enums.ImageTypeEnum.VIDEO_STILL
+        i.remote_url = 'http://my.sample.com/image-2.jpg'
+        video.set_image(i)
         
         self.assertEquals(video.id, 10)
         self.assertEquals(m.method_calls[0][0], 'post')
         self.assertEquals(m.method_calls[0][1][0], 'create_video')
         self.assertEquals(len(m.method_calls[0][2]['video']['renditions']), 3)
         self.assertEquals(m.method_calls[0][2]['video']['renditions'][1]['remoteUrl'], 'http://my.server.com/560_h264.flv')
+        self.assertEquals(m.method_calls[1][0], 'post')
+        self.assertEquals(m.method_calls[1][1][0], 'add_image')
+        self.assertEquals(m.method_calls[1][2]['image']['remoteUrl'], 'http://my.sample.com/image-1.jpg')
+        self.assertEquals(m.method_calls[2][0], 'post')
+        self.assertEquals(m.method_calls[2][1][0], 'add_image')
+        self.assertEquals(m.method_calls[2][2]['image']['remoteUrl'], 'http://my.sample.com/image-2.jpg')
 
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_save_update(self, ConnectionMock):
@@ -278,7 +293,7 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(m.method_calls[0][0], 'get_item')
         self.assertEquals(m.method_calls[1][0], 'post')
         self.assertEquals(m.method_calls[1][1][0], 'add_image')
-        self.assertEquals(m.method_calls[1][2]['video_id'], TEST_VIDEO_ID)
+        self.assertEquals(m.method_calls[1][2]['video_reference_id'], TEST_VIDEO_ID)
         self.assertEquals(video.image.to_dict(), IMAGE_DATA)
 
     @mock.patch('pybrightcove.connection.APIConnection')

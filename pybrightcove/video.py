@@ -647,10 +647,10 @@ class Video(object):
             raise pybrightcove.exceptions.PyBrightcoveError("Video.share expects an iterable argument")
         raise pybrightcove.exceptions.PyBrightcoveError("Not yet implemented")
 
-    def set_image(self, image, filename=None, resize=True):
+    def set_image(self, image, filename=None, resize=False):
         if self.id:
             data = self.connection.post('add_image', filename,
-                video_id=self.id, image=image.to_dict(), resize=resize)
+                video_reference_id=self.id, image=image.to_dict(), resize=resize)
             if data:
                 self.image = Image(data=data)
 
