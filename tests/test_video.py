@@ -61,6 +61,59 @@ IMAGE_DATA = {
     'remoteUrl': 'image url'
 }
 
+class RenditionTest(unittest.TestCase):
+
+    def test_invalid_size_type(self):
+        try:
+            r = pybrightcove.video.Rendition()
+            r.remote_url = 'http://my.sample.com/flash.flv'
+            r.size = 'invalid'
+            r.video_duration = 600000
+            r.video_codec = pybrightcove.enums.VideoCodecEnum.H264
+            self.fail("Should have raised a PyBrightcoveError")
+        except pybrightcove.exceptions.PyBrightcoveError, e:
+            self.assertEquals(str(e), "Rendition.size must be the number of bytes as an integer or long.")
+
+    def test_invalid_duration_type(self):
+        try:
+            r = pybrightcove.video.Rendition()
+            r.remote_url = 'http://my.sample.com/flash.flv'
+            r.size = 10000000
+            r.video_duration = "invalid"
+            r.video_codec = pybrightcove.enums.VideoCodecEnum.H264
+            self.fail("Should have raised a PyBrightcoveError")
+        except pybrightcove.exceptions.PyBrightcoveError, e:
+            self.assertEquals(str(e), "Rendition.video_duration must be the duration in milliseconds as an integer or long.")
+
+    def test_invalid_codec_type(self):
+        try:
+            r = pybrightcove.video.Rendition()
+            r.remote_url = 'http://my.sample.com/flash.flv'
+            r.size = 10000000
+            r.video_duration = 600000
+            r.video_codec = "INVALID"
+            self.fail("Should have raised a PyBrightcoveError")
+        except pybrightcove.exceptions.PyBrightcoveError, e:
+            self.assertEquals(str(e), "Rendition.video_codec must be SORENSON, ON2, or H264.")
+
+    def test_serialization(self):
+        r = pybrightcove.video.Rendition()
+        r.remote_url = 'http://my.sample.com/flash.flv'
+        r.size = 10000000
+        r.video_duration = 600000
+        r.video_codec = pybrightcove.enums.VideoCodecEnum.H264
+        data = r.to_dict()
+        self.assertTrue('remoteUrl' in data.keys())
+        self.assertTrue('size' in data.keys())
+        self.assertTrue('videoDuration' in data.keys())
+        self.assertTrue('videoCodec' in data.keys())
+        self.assertEquals(data['remoteUrl'], 'http://my.sample.com/flash.flv')
+        self.assertEquals(data['size'], 10000000)
+        self.assertEquals(data['videoDuration'], 600000)
+        self.assertEquals(data['videoCodec'], pybrightcove.enums.VideoCodecEnum.H264)
+        self.assertEquals(len(data.keys()), 4)
+
+
 class VideoTest(unittest.TestCase):
 
     def setUp(self):
@@ -128,6 +181,46 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(video.id, 10)
         self.assertEquals(m.method_calls[0][0], 'post')
         self.assertEquals(m.method_calls[0][1][0], 'create_video')
+
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_save_new_with_renditions(self, ConnectionMock):
+        m = ConnectionMock()
+        m.post.return_value = 10
+
+        renditions = []
+        r = pybrightcove.video.Rendition()
+        r.remote_url = 'http://my.server.com/640_h264.flv'
+        r.size = 232522522
+        r.video_duration = 60000
+        r.video_codec = pybrightcove.enums.VideoCodecEnum.H264
+        renditions.append(r)
+
+        r = pybrightcove.video.Rendition()
+        r.remote_url = 'http://my.server.com/560_h264.flv'
+        r.size = 23252252
+        r.video_duration = 60000
+        r.video_codec = pybrightcove.enums.VideoCodecEnum.H264
+        renditions.append(r)
+        
+        r = pybrightcove.video.Rendition()
+        r.remote_url = 'http://my.server.com/480_h264.flv'
+        r.size = 2325225
+        r.video_duration = 60000
+        r.video_codec = pybrightcove.enums.VideoCodecEnum.H264
+        renditions.append(r)
+
+        video = pybrightcove.video.Video(name='The Bears', renditions=renditions,
+            short_description='Opening roll for an exciting soccer match.')
+        video.tags.append('unittest')
+        
+        self.assertEquals(video.id, None)
+        video.save()
+        
+        self.assertEquals(video.id, 10)
+        self.assertEquals(m.method_calls[0][0], 'post')
+        self.assertEquals(m.method_calls[0][1][0], 'create_video')
+        self.assertEquals(len(m.method_calls[0][2]['video']['renditions']), 3)
+        self.assertEquals(m.method_calls[0][2]['video']['renditions'][1]['remoteUrl'], 'http://my.server.com/560_h264.flv')
 
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_save_update(self, ConnectionMock):

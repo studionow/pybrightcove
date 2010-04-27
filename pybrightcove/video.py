@@ -82,126 +82,67 @@ class Image(object):
 class Rendition(object):
     """
     The Rendition object represents one of the dynamic delivery renditions of a
-    video. A Video should have not more than 10 Renditions.
+    video. A Video should have not more than 10 Rendition objects [1].
 
-    For more information, see Using dynamic delivery [1] and Creating videos
-    for dynamic delivery [2].
+    For more information, see Using dynamic delivery [2] and Creating videos
+    for dynamic delivery [3].
 
-    [1] http://help.brightcove.com/publisher/docs/media/mbr.cfm
-    [2] http://help.brightcove.com/developer/docs/mediaapi/create-mbr.cfm
+    [1] http://support.brightcove.com/en/docs/media-api-objects-reference#Rendition
+    [2] http://help.brightcove.com/publisher/docs/media/mbr.cfm
+    [3] http://help.brightcove.com/developer/docs/mediaapi/create-mbr.cfm
     """
 
     def __init__(self, data=None):
-        self._url = None
-        self._encodingRate = None
-        self._frameHeight = None
-        self._frameWidth = None
-        self._size = None
-        self._remoteUrl = None
-        self._remoteStreamName = None
-        self._videoDuration = None
-        self._videoCodec = None
+        self.url = None
+        self.encoding_rate = None
+        self.frame_height = None
+        self.frame_width = None
+        self.size = None
+        self.remote_url = None
+        self.remote_stream_name = None
+        self.video_duration = None
+        self.video_codec = None
 
         if data:
-            self._url = data['url']
-            self._encodingRate = data['encodingRate']
-            self._frameHeight = data['frameHeight']
-            self._frameWidth = data['frameWidth']
-            self._size = data['size']
-            self._remoteUrl = data['remoteUrl']
-            self._remoteStreamName = data['remoteStreamName']
-            self._videoDuration = data['videoDuration']
-            self._videoCodec = data['videoCodec']
+            self.url = data.get('url', None)
+            self.encoding_rate = data.get('encodingRate', None)
+            self.frame_height = data.get('frameHeight', None)
+            self.frame_width = data.get('frameWidth', None)
+            self.size = data['size']
+            self.remote_url = data['remoteUrl']
+            self.remote_stream_name = data.get('remoteStreamName', None)
+            self.video_duration = data['videoDuration']
+            self.video_codec = data['videoCodec']
 
-    def get_url(self):
-        return self._url
+    def __setattr__(self, name, value):
+        msg = None
+        if value:
+            if name == 'video_duration' and not isinstance(value, (int, long)):
+                msg = "Rendition.video_duration must be the duration in milliseconds as an integer or long."
+            if name == 'size' and not isinstance(value, (int, long)):
+                msg = "Rendition.size must be the number of bytes as an integer or long."
+            if name == 'video_codec' and \
+                    value not in (pybrightcove.enums.VideoCodecEnum.SORENSON,
+                                  pybrightcove.enums.VideoCodecEnum.ON2,
+                                  pybrightcove.enums.VideoCodecEnum.H264):
+                msg = "Rendition.video_codec must be SORENSON, ON2, or H264."
 
-    def get_encodingRate(self):
-        return self._encodingRate
-
-    def get_frameHeight(self):
-        return self._frameHeight
-
-    def get_frameWidth(self):
-        return self._frameWidth
-
-    def get_size(self):
-        return self._size
-
-    def get_remoteUrl(self):
-        return self._remoteUrl
-
-    def set_remoteUrl(self, url):
-        self._remoteUrl = url
-
-    def get_remoteStreamName(self):
-        return self._remoteStreamName
-
-    def set_remoteStreamName(self, stream_name):
-        self._remoteStreamName = stream_name
-
-    def get_videoDuration(self):
-        return self._videoDuration
-
-    def set_videoDuration(self, duration):
-        self._videoDuration = duration
-
-    def get_videoCodec(self):
-        return self._videoCodec
-
-    def set_videoCodec(self, codec):
-        if codec not in (VideoCodecEnum.SORENSON, VideoCodecEnum.ON2,
-            VideoCodecEnum.H264):
-            raise TypeError("Valid values are SORENSON, ON2, or H264.")
-        self._videoCodec = codec
-
-    url = property(get_url,
-        doc="The URL of the rendition file.")
-
-    encodingRate = property(get_encodingRate,
-        doc="The rendition's encoding rate in bits per second.")
-
-    frameHeight = property(get_frameHeight,
-        doc="The rendition's display height, in pixels.")
-
-    frameWidth = property(get_frameWidth,
-        doc="The rendition's display width, in pixels.")
-
-    size = property(get_size,
-        doc="The file size of the rendition, in bytes.")
-
-    remoteUrl = property(get_remoteUrl, set_remoteUrl,
-        doc="""Required, for remote assets. The complete path to the file
-            hosted on the remote server. If the file is served using
-            progressive download, then you must include the file name and
-            extension for the file. You can also use a URL that re-directs
-            to a URL that includes the file name and extension. If the file
-            is served using Flash streaming, use the remoteStreamName
-            attribute to provide the stream name.""")
-
-    remoteStream = property(get_remoteStreamName, set_remoteStreamName,
-        doc="""[Optional - required for streaming remote assets only] A stream
-            name for Flash streaming appended to the value of the remoteUrl
-            property.""")
-
-    videoDuration = property(get_videoDuration, set_videoDuration,
-        doc="Required. The length of the remote video asset in milliseconds.")
-
-    videoCodec = property(get_videoCodec, set_videoCodec,
-        doc="Required. Valid values are SORENSON, ON2, and H264.")
+            if msg:
+                raise pybrightcove.exceptions.PyBrightcoveError(msg)
+        return super(Rendition, self).__setattr__(name, value)
 
     def to_dict(self):
         data = {
             'url': self.url,
-            'encodingRate': self.encodingRate,
-            'frameHeight': self.frameHeight,
-            'frameWidth': self.frameWidth,
+            'encodingRate': self.encoding_rate,
+            'frameHeight': self.frame_height,
+            'frameWidth': self.frame_width,
             'size': self.size,
-            'remoteUrl': self.remoteUrl,
-            'remoteStream': self.remoteStream}
-        for key in data.keys():
-            if data[key] == None:
-                data.pop(key)
+            'remoteUrl': self.remote_url,
+            'remoteStream': self.remote_stream_name,
+            'videoDuration': self.video_duration,
+            'videoCodec': self.video_codec}
+        [data.pop(key) for key in data.keys() if data[key] is None]
         return data
 
 
@@ -405,7 +346,7 @@ class Video(object):
     """
 
     def __init__(self, filename=None, name=None, short_description=None,
-        id=None, reference_id=None, data=None, connection=None):
+        id=None, reference_id=None, renditions=None, data=None, connection=None):
 
         self._filename = None
         self.name = None
@@ -454,8 +395,11 @@ class Video(object):
             else:
                 raise pybrightcove.exceptions.PyBrightcoveError("Invalid parameters for Video.")
         else:
-            if filename and name and short_description:
-                self._filename = filename
+            if ((renditions and len(renditions) > 0) or filename) and name and short_description:
+                if filename is not None:
+                    self._filename = filename
+                if renditions is not None:
+                    self.renditions = renditions
                 self.name = name
                 self.short_description = short_description
             elif id or reference_id:
@@ -497,6 +441,10 @@ class Video(object):
             'id': self.id,
             'end_date': _make_tstamp(self.end_date),
             'start_date': _make_tstamp(self.start_date)}
+        if len(self.renditions) > 0:
+            data['renditions'] = []
+            for r in self.renditions:
+                data['renditions'].append(r.to_dict())
         [data.pop(key) for key in data.keys() if data[key] == None]
         return data
 
@@ -677,6 +625,8 @@ class Video(object):
                 preserve_source_rendition=preserve_source_rendition,
                 encode_to=encode_to,
                 video=self._to_dict())
+        elif not self.id and len(self.renditions) > 0:
+            self.id = self.connection.post('create_video', video=self._to_dict())
         elif self.id:
             data = self.connection.post('update_video', video=self._to_dict())
             if data:
