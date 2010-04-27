@@ -650,7 +650,7 @@ class Video(object):
     def set_image(self, image, filename=None, resize=False):
         if self.id:
             data = self.connection.post('add_image', filename,
-                video_reference_id=self.id, image=image.to_dict(), resize=resize)
+                video_id=self.id, image=image.to_dict(), resize=resize)
             if data:
                 self.image = Image(data=data)
 

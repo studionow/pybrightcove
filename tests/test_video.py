@@ -293,7 +293,7 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(m.method_calls[0][0], 'get_item')
         self.assertEquals(m.method_calls[1][0], 'post')
         self.assertEquals(m.method_calls[1][1][0], 'add_image')
-        self.assertEquals(m.method_calls[1][2]['video_reference_id'], TEST_VIDEO_ID)
+        self.assertEquals(m.method_calls[1][2]['video_id'], TEST_VIDEO_ID)
         self.assertEquals(video.image.to_dict(), IMAGE_DATA)
 
     @mock.patch('pybrightcove.connection.APIConnection')
