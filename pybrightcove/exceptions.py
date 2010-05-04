@@ -25,6 +25,10 @@ class PyBrightcoveError(Exception):
         super(PyBrightcoveError, self).__init__(reason)
 
 
+class ImproperlyConfiguredError(PyBrightcoveError):
+    pass
+
+
 class NoDataFoundError(PyBrightcoveError):
 
     def __init__(self, reason=None):

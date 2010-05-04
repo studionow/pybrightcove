@@ -128,7 +128,9 @@ class VideoTest(unittest.TestCase):
         m.get_list.return_value = c
         return m
 
-    def test_instantiate_new(self):
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_instantiate_new(self, ConnectionMock):
+        m = ConnectionMock()
         video = pybrightcove.video.Video(filename='/mnt/local/movie.mov', name='My Movie',
             short_description='This is my movie.')
         self.assertEquals(video.id, None)

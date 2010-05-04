@@ -129,6 +129,8 @@ class APIConnection(Connection):
         write_url=None):
         super(APIConnection, self).__init__(read_token=read_token,
             write_token=write_token, read_url=read_url, write_url=write_url)
+        if not hasattr(self, "read_token"):
+            raise pybrightcove.exceptions.ImproperlyConfiguredError("Must specify at least a read_token.")
 
     def _post(self, data, file_to_upload=None):
         params = {"JSONRPC": simplejson.dumps(data)}
@@ -137,11 +139,9 @@ class APIConnection(Connection):
             req = pybrightcove.http_core.HttpRequest(self.write_url)
             req.method = 'POST'
             req.add_body_part("JSONRPC", simplejson.dumps(data), 'text/plain')
-            req.add_body_part("filePath", file(file_to_upload, "rb"),
-                'application/octet-stream')
+            req.add_body_part("filePath", file(file_to_upload, "rb"), 'application/octet-stream')
             req.end_of_parts()
-            req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' \
-                % pybrightcove.http_core.MIME_BOUNDARY
+            req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' % pybrightcove.http_core.MIME_BOUNDARY
             req.headers['User-Agent'] = pybrightcove.config.UserAgent
 
             req = pybrightcove.http_core.ProxiedHttpClient().request(req)
@@ -272,6 +272,7 @@ class ItemCollection(object):
         self.page_number = None
         self.page_size = None
         self.items = []
+        self.data = data
 
         self.total_count = int(data['total_count'])
         self.page_number = int(data['page_number'])

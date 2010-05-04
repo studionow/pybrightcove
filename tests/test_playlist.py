@@ -49,7 +49,9 @@ class PlaylistTest(unittest.TestCase):
         m.get_list.return_value = c
         return m
 
-    def test_instantiate_new(self):
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_instantiate_new(self, ConnectionMock):
+        m = ConnectionMock()
         playlist = pybrightcove.playlist.Playlist(name='My Playlist', type=pybrightcove.enums.PlaylistTypeEnum.EXPLICIT)
         playlist.video_ids = TEST_VIDEO_IDS
         self.assertEquals(playlist.id, None)
@@ -71,8 +73,9 @@ class PlaylistTest(unittest.TestCase):
         m.get_item.return_value = {'id': TEST_PLAYLIST_ID, 'name': '', 'shortDescription': '', 'referenceId': TEST_PLAYLIST_REF_ID, 'thumbnailURL': '', 'videoIds': [], 'playlistType': ''}
         playlist = pybrightcove.playlist.Playlist(reference_id=TEST_PLAYLIST_REF_ID)
         self.assertEquals(playlist.id, TEST_PLAYLIST_ID)
-        
-    def test_instantiate_with_invalid_parameters(self):
+
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_instantiate_with_invalid_parameters(self, ConnectionMock):
         try:
             playlist = pybrightcove.playlist.Playlist(name="No type specified")
             self.fail('Should have raised an error.')

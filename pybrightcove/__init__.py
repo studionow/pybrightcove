@@ -25,4 +25,4 @@ from pybrightcove.connection import Connection, APIConnection, FTPConnection
 from pybrightcove.connection import ItemResultSet
 from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist
-
+import pybrightcove.http_core
