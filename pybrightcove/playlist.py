@@ -161,7 +161,7 @@ class Playlist(object):
         self.type = data['playlistType']
 
         for video in data.get('videos', []):
-            self.videos.append(Video(data=video))
+            self.videos.append(Video(data=video, connection=self.connection))
 
     def save(self):
         d = self._to_dict()

@@ -690,7 +690,7 @@ class Video(object):
             c = pybrightcove.connection.APIConnection()
         data = c.post('update_video', video={
             'id': video_id, 'itemState': ItemStateEnum.ACTIVE})
-        return Video(data=data)
+        return Video(data=data, connection=c)
 
     @staticmethod
     def find_modified(since, filter_list=[], connection=None, page_size=25,
