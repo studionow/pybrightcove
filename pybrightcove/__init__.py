@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+__version__ = '1.2.3'
+
 from pybrightcove.config import Version, UserAgent
 from pybrightcove.exceptions import *
 from pybrightcove.enums import *
