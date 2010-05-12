@@ -25,8 +25,7 @@ from pybrightcove.connection import Connection, APIConnection, FTPConnection
 from pybrightcove.connection import ItemResultSet
 from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist
-from pybrightcove.version import Version
 import pybrightcove.http_core
 
-__version__ = Version
+__version__ = '1.2.6'
 
