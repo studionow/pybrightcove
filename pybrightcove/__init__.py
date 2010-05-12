@@ -18,8 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-__version__ = '1.2.4'
-
 from pybrightcove.config import Version, UserAgent
 from pybrightcove.exceptions import *
 from pybrightcove.enums import *
@@ -27,4 +25,8 @@ from pybrightcove.connection import Connection, APIConnection, FTPConnection
 from pybrightcove.connection import ItemResultSet
 from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist
+from pybrightcove.version import Version
 import pybrightcove.http_core
+
+__version__ = Version
+

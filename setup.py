@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
-import pybrightcove
+from pybrightcove.version import Version
 
 setup(
     name='pybrightcove',
-    version = pybrightcove.__version__,
+    version = Version,
     author='Patrick Altman',
     author_email='patrick@studionow.com',
     url='git://github.com/studionow/pybrightcove.git',
