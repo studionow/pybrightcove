@@ -220,7 +220,6 @@ def item_lister(command, connection, page_size, page_number, sort_by,
     """
     page = page_number
     while True:
-        print ">>>", connection
         itemCollection = connection.get_list(command,
                                              page_size=page_size,
                                              page_number=page,

@@ -463,12 +463,12 @@ class VideoTest(unittest.TestCase):
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_invalid_name(self, ConnectionMock):
         try:
-            video = pybrightcove.video.Video(name="Name is too long"*10,
+            video = pybrightcove.video.Video(name="Name is too long"*20,
                           short_description="ok desc",
                           filename="somefile.mov")
         except pybrightcove.exceptions.PyBrightcoveError, e:
             self.assertEqual(str(e),
-                "Video.name must be 60 characters or less.")
+                "Video.name must be 255 characters or less.")
         else:
             self.fail("Expected pybrightcove.exceptions.PyBrightcoveError.")
 
