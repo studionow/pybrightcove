@@ -17,6 +17,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""
+The connection objects found in this module facilite all the communication to
+and from the actual APIs.
+"""
 
 import os
 import hashlib
@@ -27,16 +31,21 @@ import tempfile
 import ftplib
 from xml.dom import minidom
 import pybrightcove
-from pybrightcove import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
+from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
 
 
 class Connection(object):
+    """
+    Abstract base class for specific connection types.  This class should not
+    be used directly in user code.
+    """
 
     def _set(self, param, default=None, **kwargs):
+        # pylint: disable-msg=W,C,R
         if kwargs.get(param, None):
             setattr(self, param, kwargs[param])
-        elif pybrightcove.config.config.has_option('Connection', param):
-            setattr(self, param, pybrightcove.config.config.get('Connection', param))
+        elif pybrightcove.config.has_option('Connection', param):
+            setattr(self, param, pybrightcove.config.get('Connection', param))
         elif default:
             setattr(self, param, default)
 
@@ -58,19 +67,27 @@ class Connection(object):
         self._set('report_success', **kwargs)
 
     def post(self, **kwargs):
+        # pylint: disable-msg=W,C,R
         raise Exception("Base class must implement this method.")
 
     def get_list(self, **kwargs):
+        # pylint: disable-msg=W,C,R
         raise Exception("Base class must implement this method.")
 
     def get_item(self, **kwargs):
+        # pylint: disable-msg=W,C,R
         raise Exception("Base class must implement this method.")
 
 
 class FTPConnection(Connection):
+    """
+    Connection to use when wanting to interface with Brightcove via the batch
+    FTP interface.
+    """
 
     def __init__(self, host=None, user=None, password=None, publisher_id=None,
         preparer=None, report_success=False):
+        # pylint: disable-msg=R0913
         super(FTPConnection, self).__init__(host=host, user=user,
             password=password, publisher_id=publisher_id, preparer=preparer,
             report_success=report_success)
@@ -78,6 +95,10 @@ class FTPConnection(Connection):
         self.callback = None
 
     def get_manifest(self, asset_xml):
+        """
+        Construct and return the xml manifest to deliver along with video file.
+        """
+        # pylint: disable-msg=E1101
         manifest = '<?xml version="1.0" encoding="utf-8"?>'
         manifest += '<publisher-upload-manifest publisher-id="%s" ' % \
             self.publisher_id
@@ -93,13 +114,22 @@ class FTPConnection(Connection):
         return manifest
 
     def _send_file(self, filename):
+        """
+        Sends a file via FTP.
+        """
+        # pylint: disable-msg=E1101
         ftp = ftplib.FTP(host=self.host)
         ftp.login(user=self.user, passwd=self.password)
         ftp.set_pasv(True)
         ftp.storbinary("STOR %s" % os.path.basename(filename),
             file(filename, 'rb'))
 
-    def post(self, xml, assets):
+    def post(self, **kwargs):
+        xml = kwargs.get("xml")
+        assets = kwargs.get("assets")
+        if xml is None or assets is None:
+            raise Exception("Invalid keyword arguments!")
+
         ## Build manifest
         manifest = self.get_manifest(xml)
 
@@ -107,9 +137,11 @@ class FTPConnection(Connection):
         minidom.parseString(manifest)
 
         ## Record manifest
-        fp, fname = tempfile.mkstemp(suffix=".xml",
+        fpno, fname = tempfile.mkstemp(suffix=".xml", 
             prefix="pybrightcove-manifest")
-        file(fname, 'wb').write(manifest)
+        fp_out = os.fdopen(fpno, 'wb')
+        fp_out.write(manifest)
+        fp_out.close()
 
         ## Upload files and manifest
         for asset in assets:
@@ -117,32 +149,45 @@ class FTPConnection(Connection):
         self._send_file(fname)
 
     def get_list(self, **kwargs):
+        # pylint: disable-msg=W,C,R
         raise Exception("This method is invalid for an FTP Connection")
 
     def get_item(self, **kwargs):
+        # pylint: disable-msg=W,C,R
         raise Exception("This method is invalid for an FTP Connection")
 
 
 class APIConnection(Connection):
+    """
+    Connection to use when wanting to interface with the Brightcove Media API.
+    """
 
     def __init__(self, read_token=None, write_token=None, read_url=None,
         write_url=None):
         super(APIConnection, self).__init__(read_token=read_token,
             write_token=write_token, read_url=read_url, write_url=write_url)
         if not hasattr(self, "read_token"):
-            raise pybrightcove.exceptions.ImproperlyConfiguredError("Must specify at least a read_token.")
+            raise pybrightcove.exceptions.ImproperlyConfiguredError(
+                "Must specify at least a read_token.")
 
     def _post(self, data, file_to_upload=None):
+        """
+        Make the POST request.
+        """
+        # pylint: disable-msg=E1101
         params = {"JSONRPC": simplejson.dumps(data)}
         req = None
         if file_to_upload:
             req = pybrightcove.http_core.HttpRequest(self.write_url)
             req.method = 'POST'
             req.add_body_part("JSONRPC", simplejson.dumps(data), 'text/plain')
-            req.add_body_part("filePath", file(file_to_upload, "rb"), 'application/octet-stream')
+            upload = file(file_to_upload, "rb")
+            req.add_body_part("filePath", upload, 'application/octet-stream')
             req.end_of_parts()
-            req.headers['Content-Type'] = 'multipart/form-data; boundary=%s' % pybrightcove.http_core.MIME_BOUNDARY
-            req.headers['User-Agent'] = pybrightcove.config.UserAgent
+            content_type = "multipart/form-data; boundary=%s" % \
+                pybrightcove.http_core.MIME_BOUNDARY
+            req.headers['Content-Type'] = content_type
+            req.headers['User-Agent'] = pybrightcove.config.USER_AGENT
 
             req = pybrightcove.http_core.ProxiedHttpClient().request(req)
         else:
@@ -152,10 +197,15 @@ class APIConnection(Connection):
         if req:
             result = simplejson.loads(req.read())
             if 'error' in result and result['error']:
-                pybrightcove.exceptions.BrightcoveError.raise_exception(result['error'])
+                pybrightcove.exceptions.BrightcoveError.raise_exception(
+                    result['error'])
             return result['result']
 
     def _get_response(self, **kwargs):
+        """
+        Make the GET request.
+        """
+        # pylint: disable-msg=E1101
         url = self.read_url + "?output=JSON&token=%s" % self.read_token
         for key in kwargs:
             if key and kwargs[key]:
@@ -166,26 +216,29 @@ class APIConnection(Connection):
         req = urllib2.urlopen(url)
         data = simplejson.loads(req.read())
         if data and data.get('error', None):
-            pybrightcove.exceptions.BrightcoveError.raise_exception(data['error'])
+            pybrightcove.exceptions.BrightcoveError.raise_exception(
+                data['error'])
         if data == None:
-            raise pybrightcove.exceptions.NoDataFoundError("No data found for %s" % repr(kwargs))
+            raise pybrightcove.exceptions.NoDataFoundError(
+                "No data found for %s" % repr(kwargs))
         return data
 
     def post(self, command, file_to_upload=None, **kwargs):
+        # pylint: disable-msg=W0221,E1101
         data = {"method": command}
         params = {"token": self.write_token}
         for key in kwargs:
             if key and kwargs[key]:
                 params[key] = kwargs[key]
         if file_to_upload:
-            m = hashlib.md5()
-            fp = file(file_to_upload, 'rb')
-            bits = fp.read(262144)  ## 256KB
+            md5 = hashlib.md5()
+            file_handle = file(file_to_upload, 'rb')
+            bits = file_handle.read(262144)  ## 256KB
             while bits:
-                m.update(bits)
-                bits = fp.read(262144)
-            fp.close()
-            params['file_checksum'] = m.hexdigest()
+                md5.update(bits)
+                bits = file_handle.read(262144)
+            file_handle.close()
+            params['file_checksum'] = md5.hexdigest()
         data['params'] = params
 
         return self._post(data=data, file_to_upload=file_to_upload)
@@ -196,6 +249,7 @@ class APIConnection(Connection):
         Not intended to be called directly, but rather through an by the
         ItemResultSet object iterator.
         """
+        # pylint: disable-msg=R0913,W0221
         data = self._get_response(command=command,
                                   page_size=page_size,
                                   page_number=page_number,
@@ -209,6 +263,7 @@ class APIConnection(Connection):
                               connection=self)
 
     def get_item(self, command, **kwargs):
+        # pylint: disable-msg=W0221
         data = self._get_response(command=command, **kwargs)
         return data
 
@@ -218,32 +273,38 @@ def item_lister(command, connection, page_size, page_number, sort_by,
     """
     A generator function for listing Video and Playlist objects.
     """
+    # pylint: disable-msg=R0913
     page = page_number
     while True:
-        itemCollection = connection.get_list(command,
+        item_collection = connection.get_list(command,
                                              page_size=page_size,
                                              page_number=page,
                                              sort_by=sort_by,
                                              sort_order=sort_order,
                                              item_class=item_class,
                                              **kwargs)
-        result_set.total_count = itemCollection.total_count
+        result_set.total_count = item_collection.total_count
         result_set.page_number = page
-        for item in itemCollection.items:
+        for item in item_collection.items:
             yield item
-        if itemCollection.total_count < 0 or itemCollection.page_size == 0:
-            break  ## TODO: This doesn't seem right but is what happens when
-                   ##       fetching a list less than a single page
-        if len(itemCollection.items) > 0:
+        if item_collection.total_count < 0 or item_collection.page_size == 0:
+            break
+        if len(item_collection.items) > 0:
             page += 1
         else:
             break
 
 
 class ItemResultSet(object):
+    """
+    An object to provide an interator facility to the paging calls to the API.
+    """
+    # pylint: disable-msg=R0903,R0902
 
     def __init__(self, command, item_class, connection=None, page_size=100,
-            page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER, **kwargs):
+            page_number=0, sort_by=DEFAULT_SORT_BY,
+            sort_order=DEFAULT_SORT_ORDER, **kwargs):
+        # pylint: disable-msg=R0913
         self.command = command
         if connection:
             self.connection = connection
@@ -264,6 +325,10 @@ class ItemResultSet(object):
 
 
 class ItemCollection(object):
+    """
+    The object that represents a collection of domain objects from the API.
+    """
+    # pylint: disable-msg=R0903
 
     def __init__(self, data, item_class, connection=None):
         self.total_count = None

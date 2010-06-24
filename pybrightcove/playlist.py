@@ -20,10 +20,7 @@
 
 import pybrightcove
 from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
-#from pybrightcove import PlaylistTypeEnum, SortByType, SortByOrderType
 from pybrightcove import Video
-#from pybrightcove import APIConnection, ItemResultSet
-#from pybrightcove import PyBrightcoveError
 
 VALID_PLAYLIST_TYPES = (pybrightcove.enums.PlaylistTypeEnum.EXPLICIT,
                         pybrightcove.enums.PlaylistTypeEnum.OLDEST_TO_NEWEST,

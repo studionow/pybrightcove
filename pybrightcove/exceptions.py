@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+# pylint: disable-msg=C0111
 
 class PyBrightcoveError(Exception):
 
@@ -39,6 +40,7 @@ class BrightcoveError(Exception):
     description = "a general error"
 
     def __init__(self):
+        self.raw_data = None
         super(BrightcoveError, self).__init__(self.description)
 
     @staticmethod
