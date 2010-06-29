@@ -22,7 +22,7 @@
 from xml.dom import minidom
 import unittest
 import mock
-from pybrightcove import Video, enums, FTPConnection
+from pybrightcove import video, enums, connection
 
 
 class FTPVideoTest(unittest.TestCase):
@@ -31,8 +31,9 @@ class FTPVideoTest(unittest.TestCase):
     @mock.patch('hashlib.md5') # md5(), md5.hexdigest
     @mock.patch('os.path.getsize')
     @mock.patch('__builtin__.file')
-    def test_batch_provision_video(self, OpenMockClass, GetSizeMockClass,
-        Md5MockClass, FTPMockClass):
+    @mock.patch("os.fdopen")
+    def test_batch_provision_video(self, FDOpenMockClass, OpenMockClass, GetSizeMockClass, Md5MockClass, FTPMockClass):
+        fd = FDOpenMockClass()
         o = OpenMockClass()
         o.read.return_value = None
         m = Md5MockClass()
@@ -40,13 +41,13 @@ class FTPVideoTest(unittest.TestCase):
         GetSizeMockClass.return_value = 10000
         f = FTPMockClass()
 
-        ftp = FTPConnection(host='host',
+        ftp = connection.FTPConnection(host='host',
                             user='user',
                             password='pass',
                             publisher_id='111111111',
                             preparer='Patrick',
                             report_success=True)
-        v = Video(name="Some title",
+        v = video.Video(name="Some title",
                   reference_id='a532kallk3252a',
                   short_description="A short description.",
                   connection=ftp)
@@ -80,10 +81,10 @@ class FTPVideoTest(unittest.TestCase):
         self.assertEqual('storbinary', f.method_calls[8][0])
         self.assertEqual('STOR poster.png', f.method_calls[8][1][0])
 
-        self.assertEqual('write', o.method_calls[6][0])
+        self.assertEqual('write', fd.method_calls[2][0])
         valid_xml = minidom.parse(
             open('test_ftp_video_batch_provision_manifest.xml', 'rb'))
-        test_xml = minidom.parseString(o.method_calls[6][1][0])
+        test_xml = minidom.parseString(fd.method_calls[2][1][0])
         self.assertEqual(
             valid_xml.toxml().replace('\t', '').replace('\n', ''),
             test_xml.toxml().replace('\t', '').replace('\n', ''))
@@ -92,8 +93,10 @@ class FTPVideoTest(unittest.TestCase):
     @mock.patch('hashlib.md5')
     @mock.patch('os.path.getsize')
     @mock.patch('__builtin__.file')
-    def test_batch_provision_with_custom_metadata_video(self, OpenMockClass, 
+    @mock.patch("os.fdopen")
+    def test_batch_provision_with_custom_metadata_video(self, FDOpenMockClass, OpenMockClass, 
         GetSizeMockClass, Md5MockClass, FTPMockClass):
+        fd = FDOpenMockClass()
         o = OpenMockClass()
         o.read.return_value = None
         m = Md5MockClass()
@@ -101,13 +104,13 @@ class FTPVideoTest(unittest.TestCase):
         GetSizeMockClass.return_value = 10000
         f = FTPMockClass()
 
-        ftp = FTPConnection(host='host',
+        ftp = connection.FTPConnection(host='host',
                             user='user',
                             password='pass',
                             publisher_id='111111111',
                             preparer='Patrick',
                             report_success=True)
-        v = Video(name="Some title",
+        v = video.Video(name="Some title",
                   reference_id='a532kallk3252a',
                   short_description="A short description.",
                   connection=ftp)
@@ -146,10 +149,10 @@ class FTPVideoTest(unittest.TestCase):
         self.assertEqual('storbinary', f.method_calls[8][0])
         self.assertEqual('STOR poster.png', f.method_calls[8][1][0])
 
-        self.assertEqual('write', o.method_calls[6][0])
+        self.assertEqual('write', fd.method_calls[0][0])
         valid_xml = minidom.parse(
             open('test_ftp_video_batch_provision_with_custom_metadata_manifest.xml', 'rb'))
-        test_xml = minidom.parseString(o.method_calls[6][1][0])
+        test_xml = minidom.parseString(fd.method_calls[0][1][0])
         self.assertEqual(
             valid_xml.toxml().replace('\t', '').replace('\n', ''),
             test_xml.toxml().replace('\t', '').replace('\n', ''))

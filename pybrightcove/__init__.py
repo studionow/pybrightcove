@@ -17,17 +17,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
 """
 pybrightcove is a simple wrapper around the Brightcove Media API
 """
 
-import pybrightcove.http_core
-
-from pybrightcove.connection import Connection, APIConnection, FTPConnection
-from pybrightcove.connection import ItemResultSet
-from pybrightcove.video import Video, Image
-from pybrightcove.playlist import Playlist
-
-
 __version__ = '1.2.8'
+
+from pybrightcove import config, connection, enums, exceptions, http_core
+from pybrightcove import playlist, video
 

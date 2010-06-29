@@ -79,8 +79,8 @@ class PlaylistTest(unittest.TestCase):
         try:
             playlist = pybrightcove.playlist.Playlist(name="No type specified")
             self.fail('Should have raised an error.')
-        except pybrightcove.PyBrightcoveError, e:
-            self.assertEquals(str(e), 'Invalid parameters for Video.')
+        except pybrightcove.exceptions.PyBrightcoveError, e:
+            self.assertEquals(str(e), 'Invalid parameters for Playlist.')
 
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_save_new(self, ConnectionMock):
@@ -88,7 +88,7 @@ class PlaylistTest(unittest.TestCase):
         m.post.return_value = 10
         playlist = pybrightcove.playlist.Playlist(name="Unit Test Videos",
             type=pybrightcove.enums.PlaylistTypeEnum.EXPLICIT)
-        for video in pybrightcove.Video.find_by_tags(and_tags=['unittest', ]):
+        for video in pybrightcove.video.Video.find_by_tags(and_tags=['unittest', ]):
             playlist.videos.append(video)
         playlist.save()
         self.assertEquals(playlist.id, 10)

@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import pybrightcove
 import mock
 
-
 # httplib.HTTPConnection
 # httplib.HTTPSConnection
 # urllib2.urlopen
@@ -14,7 +13,7 @@ import mock
 class APIConnectionTest(unittest.TestCase):
 
     def setUp(self):
-        self.api = pybrightcove.APIConnection(read_token="read", write_token="write")
+        self.api = pybrightcove.connection.APIConnection(read_token="read", write_token="write")
 
     def test_instantiate_valid(self):
         self.assertTrue(hasattr(self.api, "read_token"))
@@ -28,7 +27,7 @@ class APIConnectionTest(unittest.TestCase):
 
     def test_instantiate_invalid(self):
         try:
-            c = pybrightcove.APIConnection()
+            c = pybrightcove.connection.APIConnection()
             self.fail("pybrightcove.exceptions.ImproperlyConfiguredError expected")
         except pybrightcove.exceptions.ImproperlyConfiguredError:
             pass
@@ -73,7 +72,7 @@ class APIConnectionTest(unittest.TestCase):
         u = UrlOpenMock()
         
         u.read.return_value = '{"total_count": 5, "page_number": 2, "page_size": 10, "items":[]}'
-        d = self.api.get_list('whatever_list', pybrightcove.Video, 10, 2, pybrightcove.enums.DEFAULT_SORT_BY, pybrightcove.enums.DEFAULT_SORT_ORDER)
+        d = self.api.get_list('whatever_list', pybrightcove.video.Video, 10, 2, pybrightcove.enums.DEFAULT_SORT_BY, pybrightcove.enums.DEFAULT_SORT_ORDER)
         self.assertEquals(d.data, {"total_count": 5, "page_number": 2, "page_size": 10, "items":[]})
         self.assertEquals(d.page_size, 10)
         self.assertEquals(d.total_count, 5)

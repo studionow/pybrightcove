@@ -41,7 +41,7 @@ class Connection(object):
     """
 
     def _set(self, param, default=None, **kwargs):
-        # pylint: disable-msg=W,C,R
+        # pylint: disable=W,C,R
         if kwargs.get(param, None):
             setattr(self, param, kwargs[param])
         elif pybrightcove.config.has_option('Connection', param):
@@ -67,15 +67,15 @@ class Connection(object):
         self._set('report_success', **kwargs)
 
     def post(self, **kwargs):
-        # pylint: disable-msg=W,C,R
+        # pylint: disable=W,C,R
         raise Exception("Base class must implement this method.")
 
     def get_list(self, **kwargs):
-        # pylint: disable-msg=W,C,R
+        # pylint: disable=W,C,R
         raise Exception("Base class must implement this method.")
 
     def get_item(self, **kwargs):
-        # pylint: disable-msg=W,C,R
+        # pylint: disable=W,C,R
         raise Exception("Base class must implement this method.")
 
 
@@ -87,7 +87,7 @@ class FTPConnection(Connection):
 
     def __init__(self, host=None, user=None, password=None, publisher_id=None,
         preparer=None, report_success=False):
-        # pylint: disable-msg=R0913
+        # pylint: disable=R0913
         super(FTPConnection, self).__init__(host=host, user=user,
             password=password, publisher_id=publisher_id, preparer=preparer,
             report_success=report_success)
@@ -98,7 +98,7 @@ class FTPConnection(Connection):
         """
         Construct and return the xml manifest to deliver along with video file.
         """
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         manifest = '<?xml version="1.0" encoding="utf-8"?>'
         manifest += '<publisher-upload-manifest publisher-id="%s" ' % \
             self.publisher_id
@@ -117,7 +117,7 @@ class FTPConnection(Connection):
         """
         Sends a file via FTP.
         """
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         ftp = ftplib.FTP(host=self.host)
         ftp.login(user=self.user, passwd=self.password)
         ftp.set_pasv(True)
@@ -149,11 +149,11 @@ class FTPConnection(Connection):
         self._send_file(fname)
 
     def get_list(self, **kwargs):
-        # pylint: disable-msg=W,C,R
+        # pylint: disable=W,C,R
         raise Exception("This method is invalid for an FTP Connection")
 
     def get_item(self, **kwargs):
-        # pylint: disable-msg=W,C,R
+        # pylint: disable=W,C,R
         raise Exception("This method is invalid for an FTP Connection")
 
 
@@ -174,7 +174,7 @@ class APIConnection(Connection):
         """
         Make the POST request.
         """
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         params = {"JSONRPC": simplejson.dumps(data)}
         req = None
         if file_to_upload:
@@ -205,7 +205,7 @@ class APIConnection(Connection):
         """
         Make the GET request.
         """
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         url = self.read_url + "?output=JSON&token=%s" % self.read_token
         for key in kwargs:
             if key and kwargs[key]:
@@ -224,7 +224,7 @@ class APIConnection(Connection):
         return data
 
     def post(self, command, file_to_upload=None, **kwargs):
-        # pylint: disable-msg=W0221,E1101
+        # pylint: disable=W0221,E1101
         data = {"method": command}
         params = {"token": self.write_token}
         for key in kwargs:
@@ -249,7 +249,7 @@ class APIConnection(Connection):
         Not intended to be called directly, but rather through an by the
         ItemResultSet object iterator.
         """
-        # pylint: disable-msg=R0913,W0221
+        # pylint: disable=R0913,W0221
         data = self._get_response(command=command,
                                   page_size=page_size,
                                   page_number=page_number,
@@ -263,7 +263,7 @@ class APIConnection(Connection):
                               connection=self)
 
     def get_item(self, command, **kwargs):
-        # pylint: disable-msg=W0221
+        # pylint: disable=W0221
         data = self._get_response(command=command, **kwargs)
         return data
 
@@ -273,7 +273,7 @@ def item_lister(command, connection, page_size, page_number, sort_by,
     """
     A generator function for listing Video and Playlist objects.
     """
-    # pylint: disable-msg=R0913
+    # pylint: disable=R0913
     page = page_number
     while True:
         item_collection = connection.get_list(command,
@@ -299,12 +299,12 @@ class ItemResultSet(object):
     """
     An object to provide an interator facility to the paging calls to the API.
     """
-    # pylint: disable-msg=R0903,R0902
+    # pylint: disable=R0903,R0902
 
     def __init__(self, command, item_class, connection=None, page_size=100,
             page_number=0, sort_by=DEFAULT_SORT_BY,
             sort_order=DEFAULT_SORT_ORDER, **kwargs):
-        # pylint: disable-msg=R0913
+        # pylint: disable=R0913
         self.command = command
         if connection:
             self.connection = connection
@@ -328,7 +328,7 @@ class ItemCollection(object):
     """
     The object that represents a collection of domain objects from the API.
     """
-    # pylint: disable-msg=R0903
+    # pylint: disable=R0903
 
     def __init__(self, data, item_class, connection=None):
         self.total_count = None

@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# pylint: disable-msg=C0111
+# pylint: disable=C0111
 
 class PyBrightcoveError(Exception):
 

@@ -25,7 +25,6 @@ with playlist objects.
 
 import pybrightcove
 from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
-from pybrightcove import Video
 
 VALID_PLAYLIST_TYPES = (pybrightcove.enums.PlaylistTypeEnum.EXPLICIT,
                         pybrightcove.enums.PlaylistTypeEnum.OLDEST_TO_NEWEST,
@@ -39,9 +38,9 @@ class Playlist(object):
     """
     The Playlist object is a collection of Videos.
     """
-    # pylint: disable-msg=C0103,R0913,R0902
+    # pylint: disable=C0103,R0913,R0902
     # redefine type,id builtins - refactor later
-    # pylint: disable-msg=W0622
+    # pylint: disable=W0622
     def __init__(self, name=None, type=None, id=None, reference_id=None,
         data=None, connection=None):
         self.id = None
@@ -70,7 +69,7 @@ class Playlist(object):
         elif data:
             self._load(data)
         else:
-            msg = "Invalid parameters for Video."
+            msg = "Invalid parameters for Playlist."
             raise pybrightcove.exceptions.PyBrightcoveError(msg)
 
     def __setattr__(self, name, value):
@@ -143,7 +142,8 @@ class Playlist(object):
         self.type = data['playlistType']
 
         for video in data.get('videos', []):
-            self.videos.append(Video(data=video, connection=self.connection))
+            self.videos.append(pybrightcove.video.Video(
+                data=video, connection=self.connection))
 
     def save(self):
         """

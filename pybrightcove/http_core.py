@@ -1,3 +1,4 @@
+# pylint: disable=W,R,C
 #!/usr/bin/env python
 #
 #    Copyright (C) 2009 Google Inc.

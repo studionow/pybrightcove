@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# pylint: disable-msg=C0103,R0913,R0903,R0915,R0902,R0914,R0904,R0201
+# pylint: disable=C0103,R0913,R0903,R0915,R0902,R0914,R0904,R0201
 
 """
 The ``pybrightcove.video`` module supports all the Brightcove Video APIs.
@@ -220,7 +220,7 @@ class Video(object):
     associated with a video.
     """
 
-    # pylint: disable-msg=W0622
+    # pylint: disable=W0622
     def __init__(self, filename=None, name=None, short_description=None,
         id=None, reference_id=None, renditions=None, data=None,
         connection=None):
@@ -340,7 +340,7 @@ class Video(object):
         return data
 
     def to_xml(self):
-        # pylint: disable-msg=R0912
+        # pylint: disable=R0912
         """
         Converts object into an XML string.
         """
@@ -523,7 +523,7 @@ class Video(object):
         Creates or updates the video
         """
         if is_ftp_connection(self.connection) and len(self.assets) > 0:
-            self.connection.post(self.to_xml(), self.assets)
+            self.connection.post(xml=self.to_xml(), assets=self.assets)
         elif not self.id and self._filename:
             self.id = self.connection.post('create_video', self._filename,
                 create_multiple_renditions=create_multiple_renditions,
