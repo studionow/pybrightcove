@@ -29,5 +29,5 @@ from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist
 
 
-__version__ = '1.2.6'
+__version__ = '1.2.8'
 
