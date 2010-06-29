@@ -38,20 +38,16 @@ class NoDataFoundError(PyBrightcoveError):
 class BrightcoveError(Exception):
     description = "a general error"
 
-    def __init__(self):
-        super(BrightcoveError, self).__init__(self.description)
+    def __init__(self, description=None, raw_data=None):
+        self.description = description or self.description
+        self.raw_data = raw_data
+        super(BrightcoveError, self).__init__(self.description, self.raw_data)
 
-    @staticmethod
-    def raise_exception(data):
-        error = BrightcoveError()
-        error.raw_data = data
+    @classmethod
+    def raise_exception(cls, data):
         if "code" in data and data["code"] in ERROR_MAP:
-            error = ERROR_MAP[data["code"]]()
-            error.raw_data = data
-            if data.get('message', None):
-                error.description = data['message']
-
-        raise error
+            raise ERROR_MAP[data["code"]](data.get("message"), data)
+        raise cls(raw_data=data)
 
     def __unicode__(self):
         return u'%s' % self.description
