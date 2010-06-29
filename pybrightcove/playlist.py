@@ -18,7 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# pylint: disable-msg=C0111
+"""
+The ``pybrightcove.playlist`` module supports all Brightcove functions dealing
+with playlist objects.
+"""
 
 import pybrightcove
 from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
@@ -35,40 +38,6 @@ VALID_PLAYLIST_TYPES = (pybrightcove.enums.PlaylistTypeEnum.EXPLICIT,
 class Playlist(object):
     """
     The Playlist object is a collection of Videos.
-
-    id
-        A number that uniquely identifies this Playlist. This id is
-        automatically assigned when the Playlist is created.
-
-    reference_id
-        A user-specified id that uniquely identifies this Playlist.
-
-    account_id
-        A number that uniquely identifies the account to which this Playlist
-        belongs, assigned by Brightcove.
-
-    name
-        The title of this Playlist. The name is a required property when you
-        create a playlist.
-
-    short_description
-        A short description describing this Playlist, limited to 250
-        characters.
-
-    video_ids
-        A list of the ids of the Videos that are encapsulated in this Playlist.
-
-    videos
-        A list of the Video objects that are encapsulated in this Playlist.
-
-    type
-        Options are OLDEST_TO_NEWEST, NEWEST_TO_OLDEST, ALPHABETICAL,
-        PLAYSTRAILING, and PLAYSTRAILINGWEEK (each of which is a smart
-        playlist, ordered as indicated) or EXPLICIT (a manual playlist). The
-        type is a required property when you create a playlist.
-
-    thumbnail_url
-        The URL of the thumbnail associated with this Playlist.
     """
     # pylint: disable-msg=C0103,R0913,R0902
     # redefine type,id builtins - refactor later
@@ -123,6 +92,10 @@ class Playlist(object):
         return super(Playlist, self).__setattr__(name, value)
 
     def _find_playlist(self):
+        """
+        Internal method to populate the object given the ``id`` or
+        ``reference_id`` that has been set in the constructor.
+        """
         data = None
         if self.id:
             data = self.connection.get_item(
@@ -136,6 +109,9 @@ class Playlist(object):
             self._load(data)
 
     def _to_dict(self):
+        """
+        Internal method that serializes object into a dictionary.
+        """
         data = {
             'name': self.name,
             'referenceId': self.reference_id,
@@ -152,6 +128,10 @@ class Playlist(object):
         return data
 
     def _load(self, data):
+        """
+        Internal method that deserializes a ``pybrightcove.playlist.Playlist``
+        object.
+        """
         self.raw_data = data
         self.id = data['id']
         self.reference_id = data['referenceId']
@@ -166,6 +146,9 @@ class Playlist(object):
             self.videos.append(Video(data=video, connection=self.connection))
 
     def save(self):
+        """
+        Create or update a playlist.
+        """
         d = self._to_dict()
         if len(d.get('videoIds', [])) > 0:
             if not self.id:
@@ -176,6 +159,9 @@ class Playlist(object):
                     self._load(data)
 
     def delete(self, cascade=False):
+        """
+        Deletes this playlist.
+        """
         if self.id:
             self.connection.post('delete_playlist', playlist_id=self.id,
                 cascade=cascade)
@@ -184,12 +170,18 @@ class Playlist(object):
     @staticmethod
     def find_all(connection=None, page_size=100, page_number=0,
         sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        """
+        List all playlists.
+        """
         return pybrightcove.connection.ItemResultSet("find_all_playlists",
             Playlist, connection, page_size, page_number, sort_by, sort_order)
 
     @staticmethod
     def find_by_ids(ids, connection=None, page_size=100, page_number=0,
         sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        """
+        List playlists by specific IDs.
+        """
         ids = ','.join([str(i) for i in ids])
         return pybrightcove.connection.ItemResultSet('find_playlists_by_ids',
             Playlist, connection, page_size, page_number, sort_by, sort_order,
@@ -198,6 +190,9 @@ class Playlist(object):
     @staticmethod
     def find_by_reference_ids(reference_ids, connection=None, page_size=100,
         page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        """
+        List playlists by specific reference_ids.
+        """
         reference_ids = ','.join([str(i) for i in reference_ids])
         return pybrightcove.connection.ItemResultSet(
             "find_playlists_by_reference_ids", Playlist, connection, page_size,
@@ -206,6 +201,9 @@ class Playlist(object):
     @staticmethod
     def find_for_player_id(player_id, connection=None, page_size=100,
         page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
+        """
+        List playlists for a for given player id.
+        """
         return pybrightcove.connection.ItemResultSet(
             "find_playlists_for_player_id", Playlist, connection, page_size,
             page_number, sort_by, sort_order, player_id=player_id)
