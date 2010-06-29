@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+# pylint: disable-msg=C0111
+
 import pybrightcove
 from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
 from pybrightcove import Video
@@ -68,7 +70,9 @@ class Playlist(object):
     thumbnail_url
         The URL of the thumbnail associated with this Playlist.
     """
-
+    # pylint: disable-msg=C0103,R0913,R0902
+    # redefine type,id builtins - refactor later
+    # pylint: disable-msg=W0622
     def __init__(self, name=None, type=None, id=None, reference_id=None,
         data=None, connection=None):
         self.id = None
@@ -97,7 +101,8 @@ class Playlist(object):
         elif data:
             self._load(data)
         else:
-            raise pybrightcove.exceptions.PyBrightcoveError('Invalid parameters for Video.')
+            msg = "Invalid parameters for Video."
+            raise pybrightcove.exceptions.PyBrightcoveError(msg)
 
     def __setattr__(self, name, value):
         msg = None
@@ -179,27 +184,28 @@ class Playlist(object):
     @staticmethod
     def find_all(connection=None, page_size=100, page_number=0,
         sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
-        return pybrightcove.connection.ItemResultSet('find_all_playlists', Playlist, connection,
-            page_size, page_number, sort_by, sort_order)
+        return pybrightcove.connection.ItemResultSet("find_all_playlists",
+            Playlist, connection, page_size, page_number, sort_by, sort_order)
 
     @staticmethod
     def find_by_ids(ids, connection=None, page_size=100, page_number=0,
         sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         ids = ','.join([str(i) for i in ids])
-        return pybrightcove.connection.ItemResultSet('find_playlists_by_ids', Playlist, connection,
-            page_size, page_number, sort_by, sort_order, playlist_ids=ids)
+        return pybrightcove.connection.ItemResultSet('find_playlists_by_ids',
+            Playlist, connection, page_size, page_number, sort_by, sort_order,
+            playlist_ids=ids)
 
     @staticmethod
     def find_by_reference_ids(reference_ids, connection=None, page_size=100,
         page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
         reference_ids = ','.join([str(i) for i in reference_ids])
-        return pybrightcove.connection.ItemResultSet('find_playlists_by_reference_ids', Playlist,
-            connection, page_size, page_number, sort_by, sort_order,
-            reference_ids=reference_ids)
+        return pybrightcove.connection.ItemResultSet(
+            "find_playlists_by_reference_ids", Playlist, connection, page_size,
+            page_number, sort_by, sort_order, reference_ids=reference_ids)
 
     @staticmethod
     def find_for_player_id(player_id, connection=None, page_size=100,
         page_number=0, sort_by=DEFAULT_SORT_BY, sort_order=DEFAULT_SORT_ORDER):
-        return pybrightcove.connection.ItemResultSet('find_playlists_for_player_id', Playlist,
-            connection, page_size, page_number, sort_by, sort_order,
-            player_id=player_id)
+        return pybrightcove.connection.ItemResultSet(
+            "find_playlists_for_player_id", Playlist, connection, page_size,
+            page_number, sort_by, sort_order, player_id=player_id)
