@@ -22,7 +22,7 @@
 pybrightcove is a simple wrapper around the Brightcove Media API
 """
 
-__version__ = '1.2.8'
+__version__ = '1.2.9'
 
 from pybrightcove import config, connection, enums, exceptions, http_core
 from pybrightcove import playlist, video
