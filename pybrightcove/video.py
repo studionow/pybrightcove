@@ -466,9 +466,9 @@ class Video(object):
                 raise pybrightcove.exceptions.PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
 
-    def add_custom_metadata(self, key, value, meta_type):
+    def add_custom_metadata(self, key, value, meta_type=None):
         """
-        Add custom metadata to the Video.
+        Add custom metadata to the Video.  meta_type is required for XML API.
         """
         self.metadata.append({'key': key, 'value': value, 'type': meta_type})
 
