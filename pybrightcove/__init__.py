@@ -27,5 +27,5 @@ from pybrightcove.video import Video, Image
 from pybrightcove.playlist import Playlist
 import pybrightcove.http_core
 
-__version__ = '1.2.8'
+__version__ = '1.3.0'
 

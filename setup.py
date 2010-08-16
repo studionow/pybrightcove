@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pybrightcove',
-    version = '1.2.8',
+    version = '1.3.0',
     author='Patrick Altman',
     author_email='patrick@studionow.com',
     url='git://github.com/studionow/pybrightcove.git',
