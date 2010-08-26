@@ -22,12 +22,8 @@
 pybrightcove is a simple wrapper around the Brightcove Media API
 """
 
-VERSION = (1, 3, 1) # , "a", 1) # following PEP 386
+VERSION = (1, 3, 1, "f") # , "a", 1) # following PEP 386
 DEV_N = 1
-
-
-from pybrightcove import config, connection, enums, exceptions, http_core
-from pybrightcove import playlist, video
 
 
 def get_version():
@@ -42,4 +38,10 @@ def get_version():
 
 
 __version__ = get_version()
+
+
+from pybrightcove import config, connection, enums, exceptions, http_core
+from pybrightcove import playlist, video
+
+
 
