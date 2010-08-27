@@ -465,6 +465,21 @@ class Video(object):
             if msg:
                 raise pybrightcove.exceptions.PyBrightcoveError(msg)
         return super(Video, self).__setattr__(name, value)
+    
+    def get_custom_metadata(self):
+        """
+        Fetches custom metadta for an already exisiting Video.
+        """
+        if self.id is not None:
+            data = self.connection.get_item(
+                'find_video_by_id',
+                video_id=self.id,
+                video_fields="customFields"
+            )
+            for key in data.get("customFields", {}).keys():
+                val = data["customFields"].get(key)
+                if val is not None:
+                    self.add_custom_metadata(key, val)
 
     def add_custom_metadata(self, key, value, meta_type=None):
         """

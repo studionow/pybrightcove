@@ -127,6 +127,11 @@ class VideoTest(unittest.TestCase):
         c.page_size = 0
         m.get_list.return_value = c
         return m
+    
+    def _get_item_mock(self, ConnectionMock):
+        m = ConnectionMock()
+        m.get_item.return_value = {}
+        return m
 
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_instantiate_new(self, ConnectionMock):
@@ -411,6 +416,31 @@ class VideoTest(unittest.TestCase):
         self.assertEquals(m.method_calls[0][0], 'get_list')
         self.assertEquals(m.method_calls[0][1][0], 'find_videos_by_ids')
         self.assertEquals(m.method_calls[0][2]['video_ids'], ','.join([str(x) for x in TEST_VIDEO_IDS]))
+    
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_find_by_id(self, ConnectionMock):
+        m = self._get_item_mock(ConnectionMock)
+        video = pybrightcove.video.Video(id=TEST_VIDEO_IDS[0])
+        print video #self.assertEquals(type(video), Video)
+        print m.method_calls
+        self.assertEquals(m.method_calls[0][0], 'get_item')
+        self.assertEquals(m.method_calls[0][1][0], 'find_video_by_id')
+    
+    @mock.patch('pybrightcove.connection.APIConnection')
+    def test_get_metadata(self, ConnectionMock):
+        m = self._get_item_mock(ConnectionMock)
+        video = pybrightcove.video.Video(id=TEST_VIDEO_IDS[0])
+        m.get_item.return_value = {"customFields": {"sample": "title"}}
+        video.get_custom_metadata()
+        print video #self.assertEquals(type(video), Video)
+        print m.method_calls
+        print video.metadata
+        self.assertEquals(m.method_calls[0][0], 'get_item')
+        self.assertEquals(m.method_calls[0][1][0], 'find_video_by_id')
+        self.assertEquals(m.method_calls[1][1][0], 'find_video_by_id')
+        self.assertEquals(m.method_calls[1][2]["video_fields"], 'customFields')
+        self.assertEquals(video.metadata[0]["key"], "sample")
+        self.assertEquals(video.metadata[0]["value"], "title")
 
     @mock.patch('pybrightcove.connection.APIConnection')
     def test_find_all(self, ConnectionMock):
