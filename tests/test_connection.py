@@ -51,7 +51,7 @@ class APIConnectionTest(unittest.TestCase):
         f.read.return_value = ''
         video = pybrightcove.video.Video(filename='bears.mov', name='The Bears',
             short_description='Opening roll for an exciting soccer match.',
-            connection=self.api)
+            _connection=self.api)
         video.tags.append('unittest')
         vid = self.api.post('create_video', "bears.mov",
                 create_multiple_renditions=True,

@@ -50,7 +50,7 @@ class FTPVideoTest(unittest.TestCase):
         v = video.Video(name="Some title",
                   reference_id='a532kallk3252a',
                   short_description="A short description.",
-                  connection=ftp)
+                  _connection=ftp)
         v.long_description = "An even longer description"
         v.tags.extend(["blah", "nah", "tag"])
         v.add_asset('1500.flv',
@@ -113,7 +113,7 @@ class FTPVideoTest(unittest.TestCase):
         v = video.Video(name="Some title",
                   reference_id='a532kallk3252a',
                   short_description="A short description.",
-                  connection=ftp)
+                  _connection=ftp)
         v.long_description = "An even longer description"
         v.tags.extend(["blah", "nah", "tag"])
         v.add_asset('1500.flv',

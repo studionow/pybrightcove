@@ -29,9 +29,15 @@ import urllib2
 import urllib
 import tempfile
 import ftplib
+
 from xml.dom import minidom
-import pybrightcove
-from pybrightcove.enums import DEFAULT_SORT_BY, DEFAULT_SORT_ORDER
+
+#import pybrightcove
+
+from pybrightcove import config
+from pybrightcove import http_core
+from pybrightcove import enums
+from pybrightcove import exceptions
 
 
 class Connection(object):
@@ -44,8 +50,8 @@ class Connection(object):
         # pylint: disable=W,C,R
         if kwargs.get(param, None):
             setattr(self, param, kwargs[param])
-        elif pybrightcove.config.has_option('Connection', param):
-            setattr(self, param, pybrightcove.config.get('Connection', param))
+        elif config.has_option('Connection', param):
+            setattr(self, param, config.get('Connection', param))
         elif default:
             setattr(self, param, default)
 
@@ -167,7 +173,7 @@ class APIConnection(Connection):
         super(APIConnection, self).__init__(read_token=read_token,
             write_token=write_token, read_url=read_url, write_url=write_url)
         if not hasattr(self, "read_token"):
-            raise pybrightcove.exceptions.ImproperlyConfiguredError(
+            raise exceptions.ImproperlyConfiguredError(
                 "Must specify at least a read_token.")
 
     def _post(self, data, file_to_upload=None):
@@ -178,18 +184,18 @@ class APIConnection(Connection):
         params = {"JSONRPC": simplejson.dumps(data)}
         req = None
         if file_to_upload:
-            req = pybrightcove.http_core.HttpRequest(self.write_url)
+            req = http_core.HttpRequest(self.write_url)
             req.method = 'POST'
             req.add_body_part("JSONRPC", simplejson.dumps(data), 'text/plain')
             upload = file(file_to_upload, "rb")
             req.add_body_part("filePath", upload, 'application/octet-stream')
             req.end_of_parts()
             content_type = "multipart/form-data; boundary=%s" % \
-                pybrightcove.http_core.MIME_BOUNDARY
+                http_core.MIME_BOUNDARY
             req.headers['Content-Type'] = content_type
-            req.headers['User-Agent'] = pybrightcove.config.USER_AGENT
+            req.headers['User-Agent'] = config.USER_AGENT
 
-            req = pybrightcove.http_core.ProxiedHttpClient().request(req)
+            req = http_core.ProxiedHttpClient().request(req)
         else:
             msg = urllib.urlencode({'json': params['JSONRPC']})
             req = urllib2.urlopen(self.write_url, msg)
@@ -197,7 +203,7 @@ class APIConnection(Connection):
         if req:
             result = simplejson.loads(req.read())
             if 'error' in result and result['error']:
-                pybrightcove.exceptions.BrightcoveError.raise_exception(
+                exceptions.BrightcoveError.raise_exception(
                     result['error'])
             return result['result']
 
@@ -216,10 +222,10 @@ class APIConnection(Connection):
         req = urllib2.urlopen(url)
         data = simplejson.loads(req.read())
         if data and data.get('error', None):
-            pybrightcove.exceptions.BrightcoveError.raise_exception(
+            exceptions.BrightcoveError.raise_exception(
                 data['error'])
         if data == None:
-            raise pybrightcove.exceptions.NoDataFoundError(
+            raise exceptions.NoDataFoundError(
                 "No data found for %s" % repr(kwargs))
         return data
 
@@ -302,8 +308,8 @@ class ItemResultSet(object):
     # pylint: disable=R0903,R0902
 
     def __init__(self, command, item_class, connection=None, page_size=100,
-            page_number=0, sort_by=DEFAULT_SORT_BY,
-            sort_order=DEFAULT_SORT_ORDER, **kwargs):
+            page_number=0, sort_by=enums.DEFAULT_SORT_BY,
+            sort_order=enums.DEFAULT_SORT_ORDER, **kwargs):
         # pylint: disable=R0913
         self.command = command
         if connection:
