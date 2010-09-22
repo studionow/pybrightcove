@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import os
 from xml.dom import minidom
 import unittest
 import mock
@@ -83,7 +84,7 @@ class FTPVideoTest(unittest.TestCase):
 
         self.assertEqual('write', fd.method_calls[2][0])
         valid_xml = minidom.parse(
-            open('test_ftp_video_batch_provision_manifest.xml', 'rb'))
+            open(os.path.join(os.path.dirname(__file__), 'test_ftp_video_batch_provision_manifest.xml'), 'rb'))
         test_xml = minidom.parseString(fd.method_calls[2][1][0])
         self.assertEqual(
             valid_xml.toxml().replace('\t', '').replace('\n', ''),
@@ -151,7 +152,7 @@ class FTPVideoTest(unittest.TestCase):
 
         self.assertEqual('write', fd.method_calls[0][0])
         valid_xml = minidom.parse(
-            open('test_ftp_video_batch_provision_with_custom_metadata_manifest.xml', 'rb'))
+            open(os.path.join(os.path.dirname(__file__), 'test_ftp_video_batch_provision_with_custom_metadata_manifest.xml'), 'rb'))
         test_xml = minidom.parseString(fd.method_calls[0][1][0])
         self.assertEqual(
             valid_xml.toxml().replace('\t', '').replace('\n', ''),
