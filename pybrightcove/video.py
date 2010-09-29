@@ -640,7 +640,7 @@ class Video(object):
         data = c.post('update_video', video={
             'id': video_id,
             'itemState': enums.ItemStateEnum.ACTIVE})
-        return Video(data=data, connection=c)
+        return Video(data=data, _connection=c)
 
     @staticmethod
     def find_modified(since, filter_list=None, _connection=None, page_size=25,
