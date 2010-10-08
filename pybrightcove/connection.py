@@ -266,7 +266,7 @@ class APIConnection(Connection):
                                   **kwargs)
         return ItemCollection(data=data,
                               item_class=item_class,
-                              connection=self)
+                              _connection=self)
 
     def get_item(self, command, **kwargs):
         # pylint: disable=W0221
@@ -274,7 +274,7 @@ class APIConnection(Connection):
         return data
 
 
-def item_lister(command, connection, page_size, page_number, sort_by,
+def item_lister(command, _connection, page_size, page_number, sort_by,
     sort_order, item_class, result_set, **kwargs):
     """
     A generator function for listing Video and Playlist objects.
@@ -282,7 +282,7 @@ def item_lister(command, connection, page_size, page_number, sort_by,
     # pylint: disable=R0913
     page = page_number
     while True:
-        item_collection = connection.get_list(command,
+        item_collection = _connection.get_list(command,
                                              page_size=page_size,
                                              page_number=page,
                                              sort_by=sort_by,
@@ -307,15 +307,15 @@ class ItemResultSet(object):
     """
     # pylint: disable=R0903,R0902
 
-    def __init__(self, command, item_class, connection=None, page_size=100,
+    def __init__(self, command, item_class, _connection=None, page_size=100,
             page_number=0, sort_by=enums.DEFAULT_SORT_BY,
             sort_order=enums.DEFAULT_SORT_ORDER, **kwargs):
         # pylint: disable=R0913
         self.command = command
-        if connection:
-            self.connection = connection
+        if _connection:
+            self._connection = _connection
         else:
-            self.connection = APIConnection()
+            self._connection = APIConnection()
         self.page_size = page_size
         self.page_number = page_number
         self.sort_by = sort_by
@@ -325,7 +325,7 @@ class ItemResultSet(object):
         self.total_count = None
 
     def __iter__(self):
-        return item_lister(self.command, self.connection, self.page_size,
+        return item_lister(self.command, self._connection, self.page_size,
             self.page_number, self.sort_by, self.sort_order, self.item_class,
             self, **self.kwargs)
 
@@ -336,7 +336,7 @@ class ItemCollection(object):
     """
     # pylint: disable=R0903
 
-    def __init__(self, data, item_class, connection=None):
+    def __init__(self, data, item_class, _connection=None):
         self.total_count = None
         self.items = None
         self.page_number = None
@@ -348,4 +348,4 @@ class ItemCollection(object):
         self.page_number = int(data['page_number'])
         self.page_size = int(data['page_size'])
         for item in data['items']:
-            self.items.append(item_class(data=item, connection=connection))
+            self.items.append(item_class(data=item, _connection=_connection))
