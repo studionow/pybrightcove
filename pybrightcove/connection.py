@@ -352,4 +352,5 @@ class ItemCollection(object):
         self.page_number = int(data['page_number'])
         self.page_size = int(data['page_size'])
         for item in data['items']:
-            self.items.append(item_class(data=item, _connection=_connection))
+            if item is not None:  # @@@ Not sure why but the Media API sometimes returns None for items in the list
+                self.items.append(item_class(data=item, _connection=_connection))
