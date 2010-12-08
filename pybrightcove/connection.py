@@ -175,6 +175,8 @@ class APIConnection(Connection):
         if not hasattr(self, "read_token"):
             raise exceptions.ImproperlyConfiguredError(
                 "Must specify at least a read_token.")
+        self._api_url = None
+        self._api_raw_data = None
 
     def _post(self, data, file_to_upload=None):
         """
@@ -221,6 +223,8 @@ class APIConnection(Connection):
                 url += "&%s=%s" % (key, val)
         req = urllib2.urlopen(url)
         data = simplejson.loads(req.read())
+        self._api_url = url
+        self._api_raw_data = data
         if data and data.get('error', None):
             exceptions.BrightcoveError.raise_exception(
                 data['error'])
