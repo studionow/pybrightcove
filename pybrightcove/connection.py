@@ -221,9 +221,9 @@ class APIConnection(Connection):
                 if isinstance(val, (list, tuple)):
                     val = ",".join(val)
                 url += "&%s=%s" % (key, val)
+        self._api_url = url
         req = urllib2.urlopen(url)
         data = simplejson.loads(req.read())
-        self._api_url = url
         self._api_raw_data = data
         if data and data.get('error', None):
             exceptions.BrightcoveError.raise_exception(
